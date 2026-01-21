@@ -1,13 +1,13 @@
 services: 
     web:
         hostname: web
-        container_name: MarketBasketWeb
+        container_name: goGroupWeb
         build:
             dockerfile: php/Dockerfile
 
         volumes:
         - ./webserver_data/:/var/www/localhost/htdocs/
-        - ./textdatenGenerator/:/var/www/textdatenGenerator
+        
 
         ports:
             - "80:80"
@@ -17,7 +17,7 @@ services:
 
     database:
         hostname: sql
-        container_name: MarketBasketSQL
+        container_name: goGroupDB
         build:
             dockerfile: Dockerfile
         user: root

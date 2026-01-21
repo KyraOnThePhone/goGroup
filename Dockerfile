@@ -11,7 +11,7 @@ RUN apt-get update && \
 # Füge mssql-tools zu PATH hinzu
 ENV PATH="$PATH:/opt/mssql-tools/bin"
 
-COPY ./init.sql /init.sql
+COPY init/init.sql /init.sql
 
 
 
