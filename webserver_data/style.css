@@ -1,0 +1,45 @@
+
+.main-nav {
+    background-color: #7a653a;
+}
+
+.main-nav .brand-logo,
+.main-nav a {
+    color: #ffffff;
+}
+
+
+.main-nav i.material-icons {
+    color: #ffffff;
+}
+
+
+.main-nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+
+footer.page-footer.main-footer {
+    background-color: #7a653a;
+    color: #ffffff;
+}
+
+footer.page-footer.main-footer h5 {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+footer.page-footer.main-footer a {
+    color: #ffffff;
+    opacity: 0.9;
+}
+
+footer.page-footer.main-footer a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+footer.page-footer.main-footer .footer-copyright {
+    background-color: rgba(0, 0, 0, 0.15);
+    padding: 10px 0;
+}
