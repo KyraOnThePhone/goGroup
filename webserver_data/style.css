@@ -1,27 +1,36 @@
 
+
+body {
+    background: linear-gradient(
+        180deg,
+        #f4f1ea 0%,
+        #ffffff 60%
+    );
+}
+
+
+
 .main-nav {
     background-color: #7a653a;
 }
 
 .main-nav .brand-logo,
-.main-nav a {
-    color: #ffffff;
-}
-
-
+.main-nav a,
 .main-nav i.material-icons {
     color: #ffffff;
 }
-
 
 .main-nav ul li a:hover {
     background-color: rgba(255, 255, 255, 0.15);
 }
 
 
+
 footer.page-footer.main-footer {
     background-color: #7a653a;
     color: #ffffff;
+    margin-top: 60px;
+    border-top: 4px solid #e6dcc6;
 }
 
 footer.page-footer.main-footer h5 {
@@ -42,4 +51,139 @@ footer.page-footer.main-footer a:hover {
 footer.page-footer.main-footer .footer-copyright {
     background-color: rgba(0, 0, 0, 0.15);
     padding: 10px 0;
+}
+
+
+
+.aktuelles-box {
+    background-color: #e6dcc6;
+    border: 6px solid #7a643a;
+    padding: 30px 40px;
+    margin-top: 40px;
+    min-height: 600px;
+}
+
+.aktuelles-title {
+    color: #7a643a;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+
+.aktuelles-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(122, 100, 58, 0.25);
+    font-size: 1.15rem;
+}
+
+.aktuelles-item:last-child {
+    border-bottom: none;
+}
+
+.aktuelles-item i {
+    color: #7a643a;
+    font-size: 28px;
+}
+
+.aktuelles-item.termin i {
+    color: #8b0000;
+}
+
+
+
+.side-box {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 25px;
+    margin-top: 40px;
+}
+
+.side-box h5 {
+    color: #7a643a;
+    margin-bottom: 20px;
+}
+
+.side-box p {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+
+
+.kalender-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.kalender-nav h5 {
+    margin: 0;
+    color: #7a643a;
+    font-weight: 600;
+}
+
+.kalender-nav i {
+    color: #7a643a;
+    font-size: 28px;
+}
+
+.kalender {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 6px;
+}
+
+.kalender th {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #7a643a;
+}
+
+.kalender td {
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 6px;
+    color: #6b5632;
+}
+
+.kalender td:hover {
+    background-color: rgba(122, 100, 58, 0.12);
+}
+
+.kalender td.termin {
+    background-color: #e6dcc6;
+    border: 1px solid #7a643a;
+    font-weight: 600;
+}
+
+.kalender td.heute {
+    outline: 2px solid #7a643a;
+}
+
+.kalender-legende {
+    margin-top: 15px;
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #6b5632;
+}
+
+.kalender-legende .punkt {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.kalender-legende .punkt.termin {
+    background-color: #e6dcc6;
+    border: 1px solid #7a643a;
+}
+
+.kalender-legende .punkt.heute {
+    border: 2px solid #7a643a;
 }

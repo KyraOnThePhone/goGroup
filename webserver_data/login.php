@@ -1,50 +1,50 @@
 <!DOCTYPE html>
 <html lang="de">
-<?php
-    include 'components/head.php';
-?>
-<header>
-    <link rel="stylesheet" href="login.css">
-</header>
+<?php include 'components/head.php'; ?>
+
 <body>
-    <?php
-        include 'components/header.php';
-    ?>
-<main>
-<div class="login-container">
-    <div class="login-box">
-        <div class="login-left">
-            <h2>Login</h2>
+<?php include 'components/header.php'; ?>
 
-            <form method="post" action="login_check.php">
-                <div class="input-field">
-                    <input id="username" type="text" name="username" required>
-                    <label for="username">Username</label>
+<main class="container">
+    <div class="row">
+
+        <div class="col s12 m8">
+            <div class="aktuelles-box z-depth-1">
+                <h4 class="center-align aktuelles-title">Aktuelles</h4>
+
+                <div class="aktuelles-item">
+                    <i class="material-icons">assignment</i>
+                    <span>Aufgabe xyz fällig am <strong>17.08.26</strong></span>
                 </div>
 
-                <div class="input-field">
-                    <input id="password" type="password" name="password" required>
-                    <label for="password">Passwort</label>
+                <div class="aktuelles-item">
+                    <i class="material-icons">assignment</i>
+                    <span>Aufgabe abc fällig am <strong>19.08.26</strong></span>
                 </div>
 
-                <button type="submit" class="btn login-btn waves-effect">
-                    Submit
-                </button>
-            </form>
+                <div class="aktuelles-item termin">
+                    <i class="material-icons">event</i>
+                    <span>Termin am <strong>09.09.26</strong></span>
+                </div>
+            </div>
         </div>
 
-        <div class="login-right">
-            <i class="material-icons">groups</i>
-            <span>Better Itslearning</span>
+        <div class="col s12 m4">
+            <div class="side-box z-depth-1">
+                <h5>Übersicht</h5>
+
+                <p><strong>2</strong> offene Aufgaben</p>
+                <p><strong>1</strong> Termin diese Woche</p>
+
+                <a href="#" class="btn brown darken-2 waves-effect waves-light">
+                    Zum Kalender
+                </a>
+            </div>
         </div>
+
     </div>
-</div>
 </main>
 
-    <?php
-        include 'components/footer.php';
-    ?>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<?php include 'components/footer.php'; ?>
 </body>
 </html>
