@@ -6,7 +6,7 @@ session_start();
 
 $serverName = "sql, 1433"; 
 $connectionInfo = array(
-    "Database" => "Login",
+    "Database" => "GoGroup",
     "UID" => "sa",
     "PWD" => "BratwurstIN23!",
     "TrustServerCertificate" => true 
@@ -46,7 +46,7 @@ if (sqlsrv_has_rows($stmt)) {
         $_SESSION['role_name'] = $role_name;  
 
 
-        $permission_sql = "SELECT permission_name FROM permissions WHERE role_id = ?";
+        $permission_sql = "SELECT PermissionName FROM PERMISSIONS WHERE RoleId = ?";
         $permission_stmt = sqlsrv_query($conn, $permission_sql, array($role_id));
 
         if ($permission_stmt === false) {
@@ -56,7 +56,7 @@ if (sqlsrv_has_rows($stmt)) {
 
         $_SESSION['permissions'] = [];
         while ($permission_row = sqlsrv_fetch_array($permission_stmt, SQLSRV_FETCH_ASSOC)) {
-            $_SESSION['permissions'][] = $permission_row['permission_name'];
+            $_SESSION['permissions'][] = $permission_row['PermissionName'];
         }
 
         sqlsrv_free_stmt($permission_stmt);

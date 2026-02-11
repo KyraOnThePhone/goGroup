@@ -173,13 +173,24 @@ END GO
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'FILE' AND type = 'U')
 BEGIN
     CREATE TABLE [FILE](
-        [FileId] int IDENTITY(1,1) primary key,
+        [FileId] int IDENTITY(1,1) NOT NULL,
         [Name] varchar(1000) NOT NULL,
-        [FolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId) NOT NULL,
-        [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [Content] VARBINARY(MAX) NOT NULL
+        [FolderId] int NOT NULL,
+        [OwnerId] int NOT NULL,
+        [Content] VARBINARY(MAX) NOT NULL,
+        
+        [SysStartTime] DATETIME2 GENERATED ALWAYS AS ROW START NOT NULL,
+        [SysEndTime] DATETIME2 GENERATED ALWAYS AS ROW END NOT NULL,
+        
+        PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime),
+        
+        CONSTRAINT [PK_FILE] PRIMARY KEY CLUSTERED ([FileId]),
+        CONSTRAINT [FK_FILE_FOLDER] FOREIGN KEY ([FolderId]) REFERENCES [FOLDER]([FolderId]),
+        CONSTRAINT [FK_FILE_USER] FOREIGN KEY ([OwnerId]) REFERENCES [USER]([UserId])
     )
-END GO
+    WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.File_History))
+END
+GO
 
 -- Chat-Nachricht
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'CHAT_MESSAGE' AND type = 'U')
@@ -206,14 +217,33 @@ BEGIN
     )
 END
 
+-- Tabelle: permissions
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'PERMISSIONS' AND type = 'U')
+BEGIN
+    CREATE TABLE PERMISSIONS (
+        id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+        RoleId INT NOT NULL,
+        PermissionName NVARCHAR(50) NOT NULL,
+        FOREIGN KEY (RoleId) REFERENCES [ROLE](RoleId) ON DELETE CASCADE
+    )
+END
+GO
+
 
 -- Standard Datensätze erstellen
 -- Rollen
 INSERT INTO [dbo].ROLE (Name) VALUES 
-    ('Admin'),
-    ('Schüler'),
-    ('Lehrer');
+    ('Admin'), -- 1
+    ('Schüler'), -- 2
+    ('Lehrer'); -- 3
 
+GO
+
+-- Permissions.
+INSERT INTO [dbo].[PERMISSIONS] (RoleId, PermissionName) VALUES
+    (1,'admin'), -- Admin hat alle Rechte
+    (2,'user'), -- Schüler hat nur normale Rechte
+    (3,'teacher') -- Lehrer hat erweiterte Rechte, aber nicht alle wie Admin
 GO
 
 -- Benutzer
@@ -221,3 +251,19 @@ INSERT INTO [dbo].[User] (FirstName,LastName,RoleId) VALUES
     ('Luca','Brüning',1),
     ('Simon','Krainert',1);
 GO
+
+-- Login (Passwort nach SHA-256 gehashed)
+INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES 
+    ('luca.bruening','d70f47790f689414789eeff231703429c7f88a10210775906460edbf38589d90',1),
+    ('simon.krainert','0a5d17d3b19f82f8340d3977609aa9e86b4ad8b9bd71bd9eced9271f1d5b2e4a',2);
+
+-- Tabellen Nr.
+INSERT INTO [dbo].[TABLENUMBER] (Name) VALUES 
+    ('PROJECT'), -- 1
+    ('TASK'), -- 2
+    ('CHAT'), -- ...
+    ('FOLDER'),
+    ('FILE'),
+    ('GROUP'),
+    ('CALENDAR'),
+    ('CALENDAR_ENTRY');
