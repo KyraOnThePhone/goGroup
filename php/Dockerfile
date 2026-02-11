@@ -1,27 +1,82 @@
-FROM namoshek/php-mssql:8.3-cli-alpine
+# -------------------------
+# Basis: PHP 8.4 mit Apache
+# -------------------------
+FROM php:8.4-apache
 
 USER root
 
+# -------------------------
+# Systembibliotheken für PHP & MSSQL
+# -------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gnupg2 \
+    ca-certificates \
+    apt-transport-https \
+    build-essential \
+    libssl-dev \
+    libzip-dev \
+    zlib1g-dev \
+    libxml2-dev \
+    unixodbc \
+    unixodbc-dev \
+    autoconf \
+    pkg-config \
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install session
-RUN apk update && apk add --no-cache apache2 apache2-utils php php-apache2 php-mysqli php-pdo_mysql php-json php-opcache php83-pear php83-xml
-RUN apk add php-session
-RUN apk add --no-cache msodbcsql18
+# -------------------------
+# Microsoft Repo einrichten (Debian 12 / Bookworm)
+# -------------------------
+RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.gpg \
+    && echo "deb [arch=amd64] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools \
+    && rm -rf /var/lib/apt/lists/*
 
+# -------------------------
+# PHP Extensions installieren
+# -------------------------
+RUN docker-php-ext-install mysqli pdo pdo_mysql zip xml opcache session
 
+# -------------------------
+# PECL SQL Server Extensions
+# -------------------------
+RUN pecl install sqlsrv-5.11.1 pdo_sqlsrv-5.11.1 \
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv
 
-RUN apk add --no-cache unixodbc unixodbc-dev
-RUN apk add make gcc g++ autoconf libc-dev unixodbc-dev
-RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories
-RUN apk update && apk add php php83-cli php83-dev php83-pear php83-common php83-pdo php83-session unixodbc-dev
-RUN curl -o /etc/apk/keys/microsoft.asc https://packages.microsoft.com/keys/microsoft.asc
-RUN apk add --no-cache msodbcsql18
+# -------------------------
+# Apache konfigurieren
+# -------------------------
+RUN a2enmod rewrite headers \
+    && mkdir -p /var/www/html \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
+# Directory Access konfigurieren über separate conf-Datei
+RUN echo '<Directory /var/www/html>' > /etc/apache2/conf-available/zz-custom.conf \
+    && echo '    Options Indexes FollowSymLinks' >> /etc/apache2/conf-available/zz-custom.conf \
+    && echo '    AllowOverride All' >> /etc/apache2/conf-available/zz-custom.conf \
+    && echo '    Require all granted' >> /etc/apache2/conf-available/zz-custom.conf \
+    && echo '</Directory>' >> /etc/apache2/conf-available/zz-custom.conf \
+    && a2enconf zz-custom
 
-  RUN echo "extension_dir = \"/usr/local/lib/php/extensions/no-debug-non-zts-20230831\"" >> /etc/php83/php.ini
+# -------------------------
+# PHP.ini Anpassungen (Sessions)
+# -------------------------
+RUN echo "session.save_handler = files" >> /usr/local/etc/php/conf.d/00-session.ini \
+    && echo "session.save_path = /tmp" >> /usr/local/etc/php/conf.d/00-session.ini \
+    && echo "session.gc_maxlifetime = 1440" >> /usr/local/etc/php/conf.d/00-session.ini \
+    && chmod 644 /usr/local/etc/php/conf.d/00-session.ini
 
-RUN echo "LoadModule php_module modules/libphp.so" >> /etc/apache2/httpd.conf \
-  && echo "AddHandler php-script .php" >> /etc/apache2/httpd.conf \
-  && echo "DirectoryIndex index.php index.html" >> /etc/apache2/httpd.conf
+# -------------------------
+# Arbeitsverzeichnis & Ports
+# -------------------------
+WORKDIR /var/www/html
+EXPOSE 80
 
-CMD ["/bin/sh", "-c", "httpd -D FOREGROUND"]
+# -------------------------
+# Start
+# -------------------------
+CMD ["apache2-foreground"]

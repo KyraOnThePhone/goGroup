@@ -6,7 +6,7 @@ services:
             dockerfile: php/Dockerfile
 
         volumes:
-        - ./webserver_data/:/var/www/localhost/htdocs/
+        - ./webserver_data/:/var/www/html
         
 
         ports:
