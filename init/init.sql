@@ -5,6 +5,9 @@ BEGIN
 END
 GO
 
+USE [GoGroup]
+GO
+
 -- Tabellen Erstellen
 -- Rolle
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'ROLE' AND type = 'U')
@@ -94,7 +97,7 @@ BEGIN
         [FolderId] int IDENTITY(1,1) primary key,
         [Name] varchar(100) NOT NULL,
         [ParentFolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId),
-        [RegardingId] int FOREIGN KEY REFERENCES [REFERENCE](ReferenceId) NOT NULL,
+        [RegardingId] int FOREIGN KEY REFERENCES [REFERENCE](ReferenceId),
         [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
         [IsRoot] BIT NOT NULL
     )
@@ -109,7 +112,8 @@ BEGIN
         [DueDate] DATETIME,
         [Description] varchar(MAX),
         [GroupId] int FOREIGN KEY REFERENCES [GROUP](GroupId) NOT NULL,
-        [DropOfFolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId) NOT NULL
+        [DropOfFolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId) NOT NULL,
+        [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL
     )
 END GO
 
@@ -239,7 +243,7 @@ INSERT INTO [dbo].ROLE (Name) VALUES
 
 GO
 
--- Permissions.
+-- Rechte
 INSERT INTO [dbo].[PERMISSIONS] (RoleId, PermissionName) VALUES
     (1,'admin'), -- Admin hat alle Rechte
     (2,'user'), -- Schüler hat nur normale Rechte
@@ -261,9 +265,65 @@ INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES
 INSERT INTO [dbo].[TABLENUMBER] (Name) VALUES 
     ('PROJECT'), -- 1
     ('TASK'), -- 2
-    ('CHAT'), -- ...
-    ('FOLDER'),
-    ('FILE'),
-    ('GROUP'),
-    ('CALENDAR'),
-    ('CALENDAR_ENTRY');
+    ('CHAT'), -- 3
+    ('FOLDER'), -- 4
+    ('FILE'), -- 5
+    ('GROUP'), -- 6
+    ('CALENDAR'), -- 7
+    ('CALENDAR_ENTRY'); -- 8
+
+-- Funktionen und Prozeduren erstellen
+-- Bezug erstellen oder abrufen
+CREATE PROCEDURE dbo.GetOrCreateReference
+    @RegardingTableNumber INT,
+    @RegardingId INT,
+    @ReferenceId INT OUTPUT
+AS
+BEGIN
+    select @ReferenceId = ReferenceId from [dbo].[REFERENCE] where RegardingTableNumber = @RegardingTableNumber and RegardingId = @RegardingId;
+
+    if @ReferenceId is null
+    BEGIN
+        insert into [dbo].[REFERENCE] (RegardingTableNumber, RegardingId) values (@RegardingTableNumber, @RegardingId);
+        select @ReferenceId = SCOPE_IDENTITY();
+    END
+
+    RETURN @ReferenceId;
+END;
+
+-- Erstelle Projekt Trigger
+CREATE TRIGGER [dbo].[CreateProjectTrigger] ON [dbo].[PROJECT]
+AFTER INSERT AS 
+BEGIN
+    SET NOCOUNT ON;
+    -- Variablen deklarieren
+    DECLARE @ProjectId int, @OwnerId int, @Title varchar(1000);
+    DECLARE @DropOfFolderResultId int, @ProjectRererenceId int;
+
+    SELECT @ProjectId = ProjectId, @OwnerId = OwnerId, @Title = Title FROM inserted;
+
+    -- Projektabgabeordner erstellen
+    INSERT INTO [dbo].[FOLDER] ([Name], [OwnerId], [IsRoot]) VALUES (
+        'Projektabgabe - {' + CAST(@ProjectId AS varchar) + '} - ' + @Title,
+        @OwnerId,
+        1 -- Is Root
+    );
+    SELECT @DropOfFolderResultId = SCOPE_IDENTITY();
+
+    -- Projekt Updaten
+    UPDATE [dbo].[PROJECT] SET DropOfFolderId = @DropOfFolderResultId WHERE ProjectId = @ProjectId;
+
+    -- Projekt-Referenz erstellen
+    EXEC dbo.GetOrCreateReference 
+        @RegardingTableNumber = 1, -- PROJECT
+        @RegardingId = @ProjectId,
+        @ReferenceId = @ProjectRererenceId OUTPUT
+
+    -- Root-Ordner mit Projekt-Referenz erstellen
+    INSERT INTO [dbo].[FOLDER] ([Name], [OwnerId], [IsRoot], [RegardingId]) VALUES (
+        'Root',
+        @OwnerId,
+        1, -- Is Root
+        @ProjectRererenceId
+    );
+END;
