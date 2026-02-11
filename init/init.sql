@@ -205,3 +205,19 @@ BEGIN
         [TimeStamp] DATETIME NOT NULL
     )
 END
+
+
+-- Standard Datensätze erstellen
+-- Rollen
+INSERT INTO [dbo].ROLE (Name) VALUES 
+    ('Admin'),
+    ('Schüler'),
+    ('Lehrer');
+
+GO
+
+-- Benutzer
+INSERT INTO [dbo].[User] (FirstName,LastName,RoleId) VALUES 
+    ('Luca','Brüning',1),
+    ('Simon','Krainert',1);
+GO
