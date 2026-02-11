@@ -18,9 +18,18 @@ if ($conn === false) {
 }
 
 
-$sql = "SELECT Accounts.id, Accounts.password, Accounts.role_id, Roles.role_name FROM Accounts 
-        JOIN Roles ON Accounts.role_id = Roles.id 
-        WHERE Accounts.username = ?";
+$sql = "SELECT 
+            u.UserId AS id,
+            u.FirstName,
+            u.LastName,
+            r.Name AS role_name,
+            r.RoleId AS role_id,
+            l.Username,
+            l.UserPassword as passwort
+        FROM dbo.[USER] AS u
+        LEFT JOIN dbo.ROLE AS r ON u.RoleId = r.RoleId
+        LEFT JOIN dbo.LOGIN AS l ON u.UserId = l.UserId
+        WHERE l.Username = ?";
 $params = array($_POST['uname']);
 $stmt = sqlsrv_query($conn, $sql, $params);
 
