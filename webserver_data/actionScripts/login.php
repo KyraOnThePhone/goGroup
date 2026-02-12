@@ -25,7 +25,7 @@ $sql = "SELECT
             r.Name AS role_name,
             r.RoleId AS role_id,
             l.Username,
-            l.UserPassword as passwort
+            l.UserPassword as password
         FROM dbo.[USER] AS u
         LEFT JOIN dbo.ROLE AS r ON u.RoleId = r.RoleId
         LEFT JOIN dbo.LOGIN AS l ON u.UserId = l.UserId
@@ -71,7 +71,7 @@ if (sqlsrv_has_rows($stmt)) {
         sqlsrv_free_stmt($permission_stmt);
 
 
-        header('Location: index.php');
+        header('Location: ../index.php');
         exit;
     } else {
         echo 'Passwort stimmt nicht mit dem Username überein';
