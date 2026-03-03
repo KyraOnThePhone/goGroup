@@ -67,7 +67,7 @@ BEGIN
     CREATE TABLE [GROUP](
         [GroupId] int IDENTITY(1,1) primary key,
         [Name] varchar(100) NOT NULL,
-        [CalendarId] int FOREIGN KEY REFERENCES [CALENDAR](CalendarId) NOT NULL
+        [CalendarId] int FOREIGN KEY REFERENCES [CALENDAR](CalendarId)
     )
 END GO
 
@@ -148,17 +148,6 @@ BEGIN
         [MemberId] int IDENTITY(1,1) primary key,
         [UserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
         [RegardingId] int FOREIGN KEY REFERENCES [REFERENCE](ReferenceId) NOT NULL
-    )
-END GO
-
--- OAuth
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'OAUTH' AND type = 'U')
-BEGIN
-    CREATE TABLE [OAUTH](
-        [OAuthId] int IDENTITY(1,1) primary key,
-        [UserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [OAuthKey] varchar(100) NOT NULL,
-        [ExpiresAt] DATETIME NOT NULL
     )
 END GO
 
