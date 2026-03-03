@@ -12,7 +12,7 @@
                 <?php if (isset($_GET['error'])): ?>
                     <div id="error-box" class="card-panel red lighten-4 red-text text-darken-4" style="padding: 10px; margin-bottom: 20px; border-radius: 4px;">
                         <i class="material-icons left" style="margin-right: 8px;">error_outline</i>
-                        <span>Login fehlgeschlagen.</span>
+                        <span><?php echo htmlspecialchars($_GET['message']); ?></span>
                     </div>
                     <script>
                         if (typeof window.history.replaceState === 'function') {

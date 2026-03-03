@@ -76,12 +76,12 @@ if (sqlsrv_has_rows($stmt)) {
         exit;
     } else {
         // KORREKTUR: Pfad mit ../ und exit danach
-        header("Location: ../login.php?error=failed");
+        header("Location: ../login.php?error=failed&message=Benutzername oder Passwort ist falsch!");
         exit(); 
     }
 } else {
     // KORREKTUR: Semikolon am Ende der Zeile und Pfad mit ../
-    header("Location: ../login.php?error=failed");
+    header("Location: ../login.php?error=failed&message=Benutzername exsistiert nicht!");
     exit();
 }
 sqlsrv_free_stmt($stmt);

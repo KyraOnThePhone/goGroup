@@ -265,7 +265,7 @@ END
 GO
 
 -- Login
-IF (SELECT COUNT(*) FROM [dbo].[USER]) = 0
+IF (SELECT COUNT(*) FROM [dbo].[LOGIN]) = 0
 BEGIN
     INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES 
         ('luca.bruening','$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O',1),
