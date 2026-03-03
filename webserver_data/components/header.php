@@ -1,3 +1,23 @@
+<?php
+include 'dbConnect.php';
+
+$groups = sqlsrv_query($conn,"
+    SELECT 
+        g.[GroupId],
+        g.[Name], 
+        COUNT(m.[MemberId]) AS MemberCount
+    FROM [GROUP] AS g
+
+    LEFT JOIN [MEMBER] AS m ON m.[GroupId] = g.[GroupId] GROUP BY g.[GroupId], g.[Name]");
+if ($groups === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+$groups_array = [];
+while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
+    $groups_array[] = $row;
+}
+?>
 <header>
     <nav class="nav navbar main-nav">
         <div class="nav-wrapper container">
@@ -22,30 +42,20 @@
                             </div>
                             <div class="gruppen-section-label">Zuletzt verwendet</div>
                             <ul class="gruppen-list" id="gruppenList">
-                                <li class="gruppen-list-item" data-name="Informatik LK">
-                                    <div class="gruppen-avatar" style="background:#4a7c59">IL</div>
-                                    <div class="gruppen-info">
-                                        <div class="gruppen-name">Informatik LK</div>
-                                        <div class="gruppen-meta">12 Mitglieder</div>
-                                    </div>
-                                    <i class="material-icons gruppen-arrow">chevron_right</i>
-                                </li>
-                                <li class="gruppen-list-item" data-name="Mathe Kurs 11b">
-                                    <div class="gruppen-avatar" style="background:#8b0000">MK</div>
-                                    <div class="gruppen-info">
-                                        <div class="gruppen-name">Mathe Kurs 11b</div>
-                                        <div class="gruppen-meta">28 Mitglieder</div>
-                                    </div>
-                                    <i class="material-icons gruppen-arrow">chevron_right</i>
-                                </li>
-                                <li class="gruppen-list-item" data-name="Projektarbeit 2026">
-                                    <div class="gruppen-avatar">PA</div>
-                                    <div class="gruppen-info">
-                                        <div class="gruppen-name">Projektarbeit 2026</div>
-                                        <div class="gruppen-meta">5 Mitglieder</div>
-                                    </div>
-                                    <i class="material-icons gruppen-arrow">chevron_right</i>
-                                </li>
+                                <?php foreach($groups_array as $row): ?>
+                                    <?php
+                                        $groupName = $row['Name'];
+                                        $avatarColor = '#' . substr(md5($row['Name']), 0, 6);;
+                                        ?>
+                                    <li class="gruppen-list-item" data-name="<?php echo $groupName ?>">
+                                        <div class="gruppen-avatar" style="background:<?php echo $avatarColor ?>"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($row['Name'], 0, 2))); ?></div>
+                                        <div class="gruppen-info">
+                                            <div class="gruppen-name"><?php echo $groupName ?></div>
+                                            <div class="gruppen-meta"><?php echo $row["MemberCount"] ?> Mitglieder</div>
+                                        </div>
+                                        <i class="material-icons gruppen-arrow">chevron_right</i>
+                                    </li>
+                                <?php endforeach; ?>
                             </ul>
                             <div class="gruppen-no-results hidden" id="gruppenNoResults">Keine Gruppen gefunden</div>
                             <a href="gruppen/erstellen.php" class="gruppen-create-btn">
