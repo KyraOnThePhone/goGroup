@@ -1,22 +1,19 @@
 <header>
     <nav class="nav navbar main-nav">
         <div class="nav-wrapper container">
-            <a href="#" class="brand-logo">
+            <a href="../index.php" class="brand-logo">
                 <i class="material-icons left">diversity_3</i>
                 Better Itslearning
             </a>
-            <!-- Mobile hamburger -->
             <a href="#" data-target="mobile-nav" class="sidenav-trigger right">
                 <i class="material-icons">menu</i>
             </a>
-            <!-- Desktop nav -->
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li class="gruppen-nav-item">
                     <a href="#" id="gruppenNavLink">
                         <i class="material-icons left">group</i>Gruppen
                         <i class="material-icons" style="font-size:16px; margin-left:2px; opacity:.7">expand_more</i>
                     </a>
-                    <!-- Gruppen Dropdown Popup -->
                     <div class="gruppen-popup" id="gruppenPopup">
                         <div class="gruppen-popup-inner">
                             <div class="gruppen-search-wrap">
@@ -68,7 +65,6 @@
         </div>
     </nav>
 
-    <!-- Mobile sidenav -->
     <ul class="sidenav" id="mobile-nav">
         <li>
             <div class="user-view" style="background: var(--gold); padding: 24px 16px 16px;">
@@ -116,7 +112,6 @@
         popup.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
         popup.addEventListener('mouseleave', hide);
 
-        // Search
         search.addEventListener('input', function () {
             filterGroups(this.value.trim().toLowerCase());
         });

@@ -234,43 +234,59 @@ END
 GO
 
 
--- Standard Datensätze erstellen
+-- Standard / Test Datensätze erstellen
 -- Rollen
-INSERT INTO [dbo].ROLE (Name) VALUES 
-    ('Admin'), -- 1
-    ('Schüler'), -- 2
-    ('Lehrer'); -- 3
-
+IF (SELECT COUNT(*) FROM [dbo].[ROLE]) = 0
+BEGIN
+    INSERT INTO [dbo].[ROLE] (Name) VALUES 
+        ('Admin'), -- 1
+        ('Schüler'), -- 2
+        ('Lehrer') -- 3
+END
 GO
 
 -- Rechte
-INSERT INTO [dbo].[PERMISSIONS] (RoleId, PermissionName) VALUES
-    (1,'admin'), -- Admin hat alle Rechte
-    (2,'user'), -- Schüler hat nur normale Rechte
-    (3,'teacher') -- Lehrer hat erweiterte Rechte, aber nicht alle wie Admin
+IF (SELECT COUNT(*) FROM [dbo].[PERMISSIONS]) = 0
+BEGIN
+    INSERT INTO [dbo].[PERMISSIONS] (RoleId, PermissionName) VALUES
+        (1,'admin'), -- Admin hat alle Rechte
+        (2,'user'), -- Schüler hat nur normale Rechte
+        (3,'teacher') -- Lehrer hat erweiterte Rechte, aber nicht alle wie Admin
+END
 GO
 
 -- Benutzer
-INSERT INTO [dbo].[User] (FirstName,LastName,RoleId) VALUES 
-    ('Luca','Brüning',1),
-    ('Simon','Krainert',1);
+IF (SELECT COUNT(*) FROM [dbo].[USER]) = 0
+BEGIN
+    INSERT INTO [dbo].[USER] (FirstName,LastName,RoleId) VALUES 
+        ('Luca','Brüning',1),
+        ('Simon','Krainert',1)
+END
 GO
 
 -- Login
-INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES 
-    ('luca.bruening','$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O',1),
-    ('simon.krainert','$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC',2);
+IF (SELECT COUNT(*) FROM [dbo].[USER]) = 0
+BEGIN
+    INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES 
+        ('luca.bruening','$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O',1),
+        ('simon.krainert','$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC',2)
+END
+GO
 
 -- Tabellen Nr.
-INSERT INTO [dbo].[TABLENUMBER] (Name) VALUES 
-    ('PROJECT'), -- 1
-    ('TASK'), -- 2
-    ('CHAT'), -- 3
-    ('FOLDER'), -- 4
-    ('FILE'), -- 5
-    ('GROUP'), -- 6
-    ('CALENDAR'), -- 7
-    ('CALENDAR_ENTRY'); -- 8
+IF (SELECT COUNT(*) FROM [dbo].[TABLENUMBER]) = 0
+BEGIN
+    INSERT INTO [dbo].[TABLENUMBER] (Name) VALUES 
+        ('PROJECT'), -- 1
+        ('TASK'), -- 2
+        ('CHAT'), -- 3
+        ('FOLDER'), -- 4
+        ('FILE'), -- 5
+        ('GROUP'), -- 6
+        ('CALENDAR'), -- 7
+        ('CALENDAR_ENTRY') -- 8
+END
+GO
 
 -- Funktionen und Prozeduren erstellen
 -- Bezug erstellen oder abrufen
@@ -327,3 +343,13 @@ BEGIN
         @ProjectRererenceId
     );
 END;
+
+-- Befehl zum Löschen der Versionierungstabelle, falls sie existiert
+-- -- 1. System-Versionierung ausschalten
+-- ALTER TABLE [dbo].[FILE] SET (SYSTEM_VERSIONING = OFF);
+-- GO
+
+-- -- 2. Beide Tabellen löschen
+-- DROP TABLE [dbo].[FILE];        -- Die aktuelle Tabelle
+-- DROP TABLE [dbo].[FILE_History]; -- Die History-Tabelle (Name kann variieren*)
+-- GO
