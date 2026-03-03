@@ -10,7 +10,7 @@
             </a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li class="gruppen-nav-item">
-                    <a href="#" id="gruppenNavLink">
+                    <a href="gruppenansicht.php" id="gruppenNavLink">
                         <i class="material-icons left">group</i>Gruppen
                         <i class="material-icons" style="font-size:16px; margin-left:2px; opacity:.7">expand_more</i>
                     </a>
