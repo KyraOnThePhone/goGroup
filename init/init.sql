@@ -112,19 +112,8 @@ BEGIN
         [DueDate] DATETIME,
         [Description] varchar(MAX),
         [GroupId] int FOREIGN KEY REFERENCES [GROUP](GroupId) NOT NULL,
-        [DropOfFolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId) NOT NULL,
+        [DropOfFolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId),
         [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL
-    )
-END GO
-
-
---Status
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'STATUS' AND type = 'U')
-BEGIN
-    CREATE TABLE [STATUS](
-        [StatusId] int IDENTITY(1,1) primary key,
-        [Name] varchar(100) NOT NULL,
-        [RegardingTableNumber] int FOREIGN KEY REFERENCES [TABLENUMBER](TableNumber) NOT NULL
     )
 END GO
 
@@ -135,7 +124,7 @@ BEGIN
         [TaskId] int IDENTITY(1,1) primary key,
         [Title] varchar(1000) NOT NULL,
         [Description] varchar(MAX),
-        [StateId] int FOREIGN KEY REFERENCES [STATUS](StatusId) NOT NULL,
+        [Status] int NOT NULL, -- 0 = offen, 1 = in Bearbeitung, 2 = erledigt
         [DueDate] DATETIME,
         [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
         [ProjectId] int FOREIGN KEY REFERENCES [PROJECT](ProjectId) NOT NULL
@@ -233,47 +222,11 @@ BEGIN
 END
 GO
 
-
--- Standard Datensätze erstellen
--- Rollen
-INSERT INTO [dbo].ROLE (Name) VALUES 
-    ('Admin'), -- 1
-    ('Schüler'), -- 2
-    ('Lehrer'); -- 3
-
-GO
-
--- Rechte
-INSERT INTO [dbo].[PERMISSIONS] (RoleId, PermissionName) VALUES
-    (1,'admin'), -- Admin hat alle Rechte
-    (2,'user'), -- Schüler hat nur normale Rechte
-    (3,'teacher') -- Lehrer hat erweiterte Rechte, aber nicht alle wie Admin
-GO
-
--- Benutzer
-INSERT INTO [dbo].[User] (FirstName,LastName,RoleId) VALUES 
-    ('Luca','Brüning',1),
-    ('Simon','Krainert',1);
-GO
-
--- Login
-INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES 
-    ('luca.bruening','$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O',1),
-    ('simon.krainert','$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC',2);
-
--- Tabellen Nr.
-INSERT INTO [dbo].[TABLENUMBER] (Name) VALUES 
-    ('PROJECT'), -- 1
-    ('TASK'), -- 2
-    ('CHAT'), -- 3
-    ('FOLDER'), -- 4
-    ('FILE'), -- 5
-    ('GROUP'), -- 6
-    ('CALENDAR'), -- 7
-    ('CALENDAR_ENTRY'); -- 8
-
 -- Funktionen und Prozeduren erstellen
 -- Bezug erstellen oder abrufen
+DROP PROCEDURE IF EXISTS dbo.GetOrCreateReference;
+GO
+
 CREATE PROCEDURE dbo.GetOrCreateReference
     @RegardingTableNumber INT,
     @RegardingId INT,
@@ -292,6 +245,9 @@ BEGIN
 END;
 
 -- Erstelle Projekt Trigger
+DROP TRIGGER IF EXISTS [dbo].[CreateProjectTrigger];
+GO
+
 CREATE TRIGGER [dbo].[CreateProjectTrigger] ON [dbo].[PROJECT]
 AFTER INSERT AS 
 BEGIN
@@ -327,3 +283,139 @@ BEGIN
         @ProjectRererenceId
     );
 END;
+
+-- Befehl zum Löschen der Versionierungstabelle, falls sie existiert
+-- -- 1. System-Versionierung ausschalten
+-- ALTER TABLE [dbo].[FILE] SET (SYSTEM_VERSIONING = OFF);
+-- GO
+
+-- -- 2. Beide Tabellen löschen
+-- DROP TABLE [dbo].[FILE];        -- Die aktuelle Tabelle
+-- DROP TABLE [dbo].[FILE_History]; -- Die History-Tabelle (Name kann variieren*)
+-- GO
+
+
+-- Standard / Test Datensätze erstellen
+-- Rollen
+IF (SELECT COUNT(*) FROM [dbo].[ROLE]) = 0
+BEGIN
+    INSERT INTO [dbo].[ROLE] (Name) VALUES 
+        ('Admin'), -- 1
+        ('Schüler'), -- 2
+        ('Lehrer') -- 3
+END
+GO
+
+-- Rechte
+IF (SELECT COUNT(*) FROM [dbo].[PERMISSIONS]) = 0
+BEGIN
+    INSERT INTO [dbo].[PERMISSIONS] (RoleId, PermissionName) VALUES
+        (1,'admin'), -- Admin hat alle Rechte
+        (2,'user'), -- Schüler hat nur normale Rechte
+        (3,'teacher') -- Lehrer hat erweiterte Rechte, aber nicht alle wie Admin
+END
+GO
+
+-- Benutzer
+IF (SELECT COUNT(*) FROM [dbo].[USER]) = 0
+BEGIN
+    INSERT INTO [dbo].[USER] (FirstName,LastName,RoleId) VALUES 
+        ('Luca','Brüning',1),
+        ('Simon','Krainert',1)
+END
+GO
+
+-- Login
+IF (SELECT COUNT(*) FROM [dbo].[LOGIN]) = 0
+BEGIN
+    INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES 
+        ('luca.bruening','$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O',1),
+        ('simon.krainert','$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC',2)
+END
+GO
+
+-- Tabellen Nr.
+IF (SELECT COUNT(*) FROM [dbo].[TABLENUMBER]) = 0
+BEGIN
+    INSERT INTO [dbo].[TABLENUMBER] (Name) VALUES 
+        ('PROJECT'), -- 1
+        ('TASK'), -- 2
+        ('CHAT'), -- 3
+        ('FOLDER'), -- 4
+        ('FILE'), -- 5
+        ('GROUP'), -- 6
+        ('CALENDAR'), -- 7
+        ('CALENDAR_ENTRY') -- 8
+END
+GO
+
+-- Gruppen
+IF (SELECT COUNT(*) FROM [dbo].[GROUP]) = 0
+BEGIN
+    INSERT INTO [dbo].[GROUP] ([Name]) VALUES 
+        ('Komm in die Gruppe xD'),
+        ('GoGroup Test Gruppe'),
+        ('Die Normalen'),
+        ('Die Coolen')
+END
+
+-- Referenzen für Gruppen erstellen
+BEGIN
+    DECLARE @Group1Ref INT;
+    DECLARE @Group2Ref INT;
+
+    EXEC "GetOrCreateReference" 
+        @RegardingTableNumber = 6, -- GROUP
+        @RegardingId = 1, -- Gruppe 1
+        @ReferenceId = @Group1Ref OUTPUT;
+
+    EXEC "GetOrCreateReference" 
+        @RegardingTableNumber = 6, -- GROUP
+        @RegardingId = 2, -- Gruppe 2
+        @ReferenceId = @Group2Ref OUTPUT;
+
+    -- Mitglieder der Gruppen
+    IF (SELECT COUNT(*) FROM [dbo].[MEMBER]) = 0
+    BEGIN
+        INSERT INTO [dbo].[MEMBER] (UserId, RegardingId) VALUES 
+            (1, @Group1Ref), -- Luca in Gruppe 1
+            (2, @Group1Ref), -- Simon in Gruppe 1
+            (1, @Group2Ref), -- Luca in Gruppe 2
+            (2, @Group2Ref)  -- Simon in Gruppe 2
+    END
+END
+
+-- Projekte
+IF (SELECT COUNT(*) FROM [dbo].[PROJECT]) = 0
+BEGIN
+    INSERT INTO [dbo].[PROJECT] 
+    (
+        [Title],
+        [DueDate],
+        [Description],
+        [GroupId],
+        [DropOfFolderId],
+        [OwnerId]
+    )
+    VALUES 
+        ('Mathe Projekt', '2024-12-31', 'Beschreibung für Projekt 1', 1, NULL, 1),
+        ('GoGroup Projekt', NULL, 'Beschreibung für Projekt 2', 1, NULL, 2)
+END
+
+-- Aufgaben
+IF (SELECT COUNT(*) FROM [dbo].[TASK]) = 0
+BEGIN
+    INSERT INTO [dbo].[TASK] 
+    (
+        [Title],
+        [Description],
+        [Status],
+        [DueDate],
+        [OwnerId],
+        [ProjectId]
+    )
+    VALUES 
+        ('Mathe Aufgabe 1', 'Beschreibung für Aufgabe 1', 0, '2024-11-30', 1, 1),
+        ('Mathe Aufgabe 2', 'Beschreibung für Aufgabe 2', 0, '2024-12-15', 2, 1),
+        ('GoGroup Aufgabe 1', 'Beschreibung für GoGroup Aufgabe 1', 0, NULL, 1, 2)
+END
