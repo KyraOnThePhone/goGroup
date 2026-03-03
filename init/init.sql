@@ -290,6 +290,9 @@ GO
 
 -- Funktionen und Prozeduren erstellen
 -- Bezug erstellen oder abrufen
+DROP PROCEDURE IF EXISTS dbo.GetOrCreateReference;
+GO
+
 CREATE PROCEDURE dbo.GetOrCreateReference
     @RegardingTableNumber INT,
     @RegardingId INT,
@@ -308,6 +311,9 @@ BEGIN
 END;
 
 -- Erstelle Projekt Trigger
+DROP TRIGGER IF EXISTS [dbo].[CreateProjectTrigger];
+GO
+
 CREATE TRIGGER [dbo].[CreateProjectTrigger] ON [dbo].[PROJECT]
 AFTER INSERT AS 
 BEGIN
