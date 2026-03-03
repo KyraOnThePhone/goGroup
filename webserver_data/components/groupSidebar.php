@@ -29,7 +29,7 @@ function sidebarActive(string $key, string $activeNav): string {
         <?php endif; ?>
     </div>
 
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav brown darken-4">
 
         <a href="chat.php" class="sidebar-nav-item<?= sidebarActive('chat', $activeNav) ?>">
             <i class="material-icons">chat</i>
