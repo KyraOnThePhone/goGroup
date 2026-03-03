@@ -74,12 +74,15 @@ if (sqlsrv_has_rows($stmt)) {
         header('Location: ../index.php');
         exit;
     } else {
-        echo 'Passwort stimmt nicht mit dem Username überein';
+        // KORREKTUR: Pfad mit ../ und exit danach
+        header("Location: ../login.php?error=failed");
+        exit(); 
     }
 } else {
-    echo 'Username existiert nicht';
+    // KORREKTUR: Semikolon am Ende der Zeile und Pfad mit ../
+    header("Location: ../login.php?error=failed");
+    exit();
 }
-
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>
