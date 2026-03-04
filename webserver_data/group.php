@@ -1,5 +1,7 @@
 <?php
-include 'dbConnect.php';
+define('GOGROUP', true);
+include 'actionScripts/dbConnect.php';
+include 'actionScripts/sessioncheck.php';
 
 $gruppenName   = "Informatik LK";
 $gruppenMeta   = "12 Mitglieder";
@@ -42,7 +44,6 @@ $activeNav     = "kalender";
             ?>
         </div>
         <div>
-            <?php include 'components/groupChat.php'; ?>
         </div>
 
     </main>

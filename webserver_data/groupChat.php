@@ -1,4 +1,5 @@
 <?php
+include 'actionScripts/sessioncheck.php';
 $gruppenName   = "Informatik LK";
 $gruppenMeta   = "12 Mitglieder";
 $gruppenAvatar = "IL";
