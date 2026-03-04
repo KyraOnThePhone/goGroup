@@ -1,4 +1,5 @@
 <?php
+include 'ajaxCheck.php';
 session_start();
 session_destroy();
 

@@ -1,4 +1,9 @@
 <?php
+if (!defined('GOGROUP')) {
+    header('Location: /unauthorized.php');
+    exit;
+}
+
 $serverName = "sql, 1433"; 
 $connectionInfo = array(
     "Database" => "GoGroup",

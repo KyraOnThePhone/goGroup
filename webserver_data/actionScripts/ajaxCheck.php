@@ -1,6 +1,27 @@
 <?php
-if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
-    http_response_code(403);
-    echo json_encode(["error" => "Unberechtigter Zugriff"]);
+
+if (function_exists('isAllowedRequest')) return;
+
+function isAllowedRequest(): bool {
+    // 1. Interner PHP-Include kein HTTP-Request
+    if (!isset($_SERVER['REQUEST_METHOD'])) {
+        return true;
+    }
+
+    // 2. AJAX-Request (fetch / XMLHttpRequest)
+    $xrw = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+    if (strtolower($xrw) === 'xmlhttprequest') {
+        return true;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
+        return true;
+    }
+
+    return false;
+}
+
+if (!isAllowedRequest()) {
+    header('Location: /unauthorized.php');
     exit;
 }
