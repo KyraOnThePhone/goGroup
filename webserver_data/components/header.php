@@ -25,6 +25,7 @@ while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
                 <i class="material-icons left">diversity_3</i>
                 Better Itslearning
             </a>
+                    <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === TRUE): ?>
             <a href="#" data-target="mobile-nav" class="sidenav-trigger right">
                 <i class="material-icons">menu</i>
             </a>
@@ -92,6 +93,7 @@ while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
         <li><a href="../calendar.php"><i class="material-icons">calendar_today</i>Kalender</a></li>
         <li><a href="#" id="openChatPopupMobile"><i class="material-icons">chat</i>Nachrichten</a></li>
     </ul>
+    <?php endif; ?>
 </header>
 
 <?php include 'chatPopup.php'; ?>
