@@ -66,15 +66,12 @@ if (sqlsrv_has_rows($stmt)) {
 
         header('Location: ../index.php');
         exit;
+
+    } else {
+        echo 'Passwort stimmt nicht mit dem Username überein';
     }
-    else {
-        header("Location: ../login.php?error=failed&message=Benutzername oder Passwort ist falsch!");
-        exit(); 
-    }
-} 
-else {
-    header("Location: ../login.php?error=failed&message=Benutzername exsistiert nicht!");
-    exit();
+} else {
+    echo 'Username existiert nicht';
 }
 
 sqlsrv_free_stmt($stmt);
