@@ -67,7 +67,7 @@ BEGIN
     CREATE TABLE [GROUP](
         [GroupId] int IDENTITY(1,1) primary key,
         [Name] varchar(100) NOT NULL,
-        [CalendarId] int FOREIGN KEY REFERENCES [CALENDAR](CalendarId) NOT NULL
+        [CalendarId] int FOREIGN KEY REFERENCES [CALENDAR](CalendarId)
     )
 END GO
 
@@ -147,18 +147,8 @@ BEGIN
     CREATE TABLE [MEMBER](
         [MemberId] int IDENTITY(1,1) primary key,
         [UserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [RegardingId] int FOREIGN KEY REFERENCES [REFERENCE](ReferenceId) NOT NULL
-    )
-END GO
-
--- OAuth
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'OAUTH' AND type = 'U')
-BEGIN
-    CREATE TABLE [OAUTH](
-        [OAuthId] int IDENTITY(1,1) primary key,
-        [UserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [OAuthKey] varchar(100) NOT NULL,
-        [ExpiresAt] DATETIME NOT NULL
+        [ChatId] int FOREIGN KEY REFERENCES [CHAT](ChatId),
+        [GroupId] int FOREIGN KEY REFERENCES [GROUP](GroupId),
     )
 END GO
 
@@ -359,30 +349,14 @@ BEGIN
         ('Die Coolen')
 END
 
--- Referenzen für Gruppen erstellen
+-- Mitglieder der Gruppen
+IF (SELECT COUNT(*) FROM [dbo].[MEMBER]) = 0
 BEGIN
-    DECLARE @Group1Ref INT;
-    DECLARE @Group2Ref INT;
-
-    EXEC "GetOrCreateReference" 
-        @RegardingTableNumber = 6, -- GROUP
-        @RegardingId = 1, -- Gruppe 1
-        @ReferenceId = @Group1Ref OUTPUT;
-
-    EXEC "GetOrCreateReference" 
-        @RegardingTableNumber = 6, -- GROUP
-        @RegardingId = 2, -- Gruppe 2
-        @ReferenceId = @Group2Ref OUTPUT;
-
-    -- Mitglieder der Gruppen
-    IF (SELECT COUNT(*) FROM [dbo].[MEMBER]) = 0
-    BEGIN
-        INSERT INTO [dbo].[MEMBER] (UserId, RegardingId) VALUES 
-            (1, @Group1Ref), -- Luca in Gruppe 1
-            (2, @Group1Ref), -- Simon in Gruppe 1
-            (1, @Group2Ref), -- Luca in Gruppe 2
-            (2, @Group2Ref)  -- Simon in Gruppe 2
-    END
+    INSERT INTO [dbo].[MEMBER] (UserId, GroupId) VALUES 
+        (1, 1), -- Luca in Gruppe 1
+        (2, 1), -- Simon in Gruppe 1
+        (1, 2), -- Luca in Gruppe 2
+        (2, 2)  -- Simon in Gruppe 2
 END
 
 -- Projekte

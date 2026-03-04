@@ -767,6 +767,7 @@ footer.page-footer.main-footer .footer-copyright {
     cursor: pointer;
     transition: var(--transition);
     border-bottom: 1px solid var(--gold-pale);
+    width: 100%;
 }
 
 .gruppen-list-item:last-child { border-bottom: none; }
