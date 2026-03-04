@@ -1,4 +1,4 @@
-<?php include 'dbConnect.php'; ?>
+<?php include 'actionScripts/dbConnect.php'; ?>
 <!DOCTYPE html>
 <html lang="de">
 <?php include 'components/head.php'; ?>
