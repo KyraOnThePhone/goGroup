@@ -41,6 +41,9 @@ $activeNav     = "kalender";
                 include 'components/calendar.php';
             ?>
         </div>
+        <div>
+            <?php include 'components/groupChat.php'; ?>
+        </div>
 
     </main>
 </div>
