@@ -74,7 +74,7 @@
             </div>
         </li>
         <li><a href="#"><i class="material-icons">group</i>Gruppen</a></li>
-        <li><a href="#"><i class="material-icons">calendar_today</i>Kalender</a></li>
+        <li><a href="../calendar.php"><i class="material-icons">calendar_today</i>Kalender</a></li>
         <li><a href="#" id="openChatPopupMobile"><i class="material-icons">chat</i>Nachrichten</a></li>
     </ul>
 </header>
