@@ -49,7 +49,7 @@ function sidebarActive(string $key, string $activeNav): string {
             Projekte
         </a>
 
-        <a href="aufgaben.php" class="sidebar-nav-item<?= sidebarActive('aufgaben', $activeNav) ?>">
+        <a href="../aufgabenAnsicht.php" class="sidebar-nav-item<?= sidebarActive('aufgaben', $activeNav) ?>">
             <i class="material-icons">task_alt</i>
             Aufgaben
         </a>
