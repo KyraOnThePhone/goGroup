@@ -2,37 +2,30 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
-//echo ini_get('session.gc_maxlifetime');
+include 'dbConnect.php';
 
-
-$serverName = "sql, 1433"; 
-$connectionInfo = array(
-    "Database" => "GoGroup",
-    "UID" => "sa",
-    "PWD" => "BratwurstIN23!",
-    "TrustServerCertificate" => true 
-);
 $conn = sqlsrv_connect($serverName, $connectionInfo);
-
 if ($conn === false) {
     die(print_r(sqlsrv_errors(), true));
 }
 
+$sql = "
+    SELECT
+        l.[LoginId],
+        l.[UserPassword],
+        u.[UserId],
+        u.[FirstName],
+        u.[LastName],
+        r.[RoleId],
+        r.[Name] AS RoleName
+    FROM [dbo].[LOGIN] l
+    JOIN [dbo].[USER]  u ON l.[UserId]  = u.[UserId]
+    JOIN [dbo].[ROLE]  r ON u.[RoleId]  = r.[RoleId]
+    WHERE l.[Username] = ?
+";
 
-$sql = "SELECT 
-            u.UserId AS id,
-            u.FirstName,
-            u.LastName,
-            r.Name AS role_name,
-            r.RoleId AS role_id,
-            l.Username,
-            l.UserPassword as password
-        FROM dbo.[USER] AS u
-        LEFT JOIN dbo.ROLE AS r ON u.RoleId = r.RoleId
-        LEFT JOIN dbo.LOGIN AS l ON u.UserId = l.UserId
-        WHERE l.Username = ?";
 $params = array($_POST['uname']);
-$stmt = sqlsrv_query($conn, $sql, $params);
+$stmt   = sqlsrv_query($conn, $sql, $params);
 
 if ($stmt === false) {
     die(print_r(sqlsrv_errors(), true));
@@ -40,52 +33,44 @@ if ($stmt === false) {
 
 if (sqlsrv_has_rows($stmt)) {
     $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-    $id = $row['id'];
-    $password = $row['password'];
-    $role_id = $row['role_id'];
-    $role_name = $row['role_name']; 
 
+    if (password_verify($_POST['pw'], $row['UserPassword'])) {
 
-    if (password_verify($_POST['pw'], $password)) {
-    
-        session_regenerate_id();
-        $_SESSION['loggedin'] = TRUE;
-        $_SESSION['name'] = $_POST['uname'];
-        $_SESSION['id'] = $id;
-        $_SESSION['role_id'] = $role_id;  
-        $_SESSION['role_name'] = $role_name;  
+        session_regenerate_id(true);
 
+        $_SESSION['loggedin']   = true;
+        $_SESSION['username']   = $_POST['uname'];
+        $_SESSION['user_id']    = $row['UserId'];
+        $_SESSION['first_name'] = $row['FirstName'];
+        $_SESSION['last_name']  = $row['LastName'];
+        $_SESSION['role_id']    = $row['RoleId'];
+        $_SESSION['role_name']  = $row['RoleName'];
 
-        $permission_sql = "SELECT PermissionName FROM PERMISSIONS WHERE RoleId = ?";
-        $permission_stmt = sqlsrv_query($conn, $permission_sql, array($role_id));
+        $perm_sql  = "SELECT [PermissionName] FROM [dbo].[PERMISSIONS] WHERE [RoleId] = ?";
+        $perm_stmt = sqlsrv_query($conn, $perm_sql, array($row['RoleId']));
 
-        if ($permission_stmt === false) {
+        if ($perm_stmt === false) {
             die(print_r(sqlsrv_errors(), true));
         }
 
-
         $_SESSION['permissions'] = [];
-        while ($permission_row = sqlsrv_fetch_array($permission_stmt, SQLSRV_FETCH_ASSOC)) {
-            $_SESSION['permissions'][] = $permission_row['PermissionName'];
+        while ($perm_row = sqlsrv_fetch_array($perm_stmt, SQLSRV_FETCH_ASSOC)) {
+            $_SESSION['permissions'][] = $perm_row['PermissionName'];
         }
-
-        sqlsrv_free_stmt($permission_stmt);
-
+        sqlsrv_free_stmt($perm_stmt);
+        sqlsrv_free_stmt($stmt);
+        sqlsrv_close($conn);
 
         header('Location: ../index.php');
         exit;
-    } 
-    else {
-        // KORREKTUR: Pfad mit ../ und exit danach
-        header("Location: ../login.php?error=failed&message=Benutzername oder Passwort ist falsch!");
-        exit(); 
+
+    } else {
+        echo 'Passwort stimmt nicht mit dem Username überein';
     }
-} 
-else {
-    // KORREKTUR: Semikolon am Ende der Zeile und Pfad mit ../
-    header("Location: ../login.php?error=failed&message=Benutzername exsistiert nicht!");
-    exit();
+} else {
+    echo 'Username existiert nicht';
 }
+
 sqlsrv_free_stmt($stmt);
 sqlsrv_close($conn);
 ?>

@@ -390,16 +390,20 @@ IF (SELECT COUNT(*) FROM [dbo].[USER]) = 0
 BEGIN
     INSERT INTO [dbo].[USER] ([FirstName], [LastName], [RoleId]) VALUES
         ('Luca',  'Brüning',  1),
-        ('Simon', 'Krainert', 1);
+        ('Simon', 'Krainert', 1),
+        ('Kyra',  'Mitwollen', 1),
+        ('Larissa', 'Windhorst', 1);
 END
 GO
 
--- Logins (bcrypt-Hashes)
+-- Logins (php-Hashes)
 IF (SELECT COUNT(*) FROM [dbo].[LOGIN]) = 0
 BEGIN
     INSERT INTO [dbo].[LOGIN] ([Username], [UserPassword], [UserId]) VALUES
         ('luca.bruening',  '$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O', 1),
-        ('simon.krainert', '$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC', 2);
+        ('simon.krainert', '$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC', 2),
+        ('kyra.mitwollen', '$2y$10$E3ms.OkOxXwukrItKcPafu9gREdwrZ.fryj2yVsk6T6a1HcQQii4a', 3),
+        ('larissa.windhorst', '$2y$10$3IqOfPVbV5CcIaskD2bLnuoF.9mhCYar4.yMNBoC81rvHUIMvK0Ni', 4);
 END
 GO
 

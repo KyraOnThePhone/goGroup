@@ -1,5 +1,5 @@
 <?php
-include 'dbConnect.php';
+/*include '../actionScripts/dbConnect.php';
 
 $groups = sqlsrv_query($conn,"
     SELECT 
@@ -16,7 +16,7 @@ if ($groups === false) {
 $groups_array = [];
 while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
     $groups_array[] = $row;
-}
+} */
 ?>
 <header>
     <nav class="nav navbar main-nav">
@@ -69,6 +69,11 @@ while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
                 <li>
                     <a href="#" id="openChatPopup">
                         <i class="material-icons left">chat</i>Nachrichten
+                    </a>
+                </li>
+                <li>
+                    <a href="actionScripts/logout.php" id="logout">
+                        <i class="material-icons left">logout</i>Abmelden
                     </a>
                 </li>
             </ul>
