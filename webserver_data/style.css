@@ -1160,9 +1160,3 @@ footer.page-footer.main-footer .footer-copyright {
     .kalender-gross .kalender td { padding: 11px 0; font-size: .9rem; }
     .kalender-gross .kalender-nav h5 { font-size: 1.2rem; }
 }
-
-@media (max-width: 480px) {
-    .aktuelles-box { padding: 18px 14px; }
-    .chat-fab { width: 50px; height: 50px; }
-    .gruppen-page-content { padding: 68px 12px 32px; }
-}

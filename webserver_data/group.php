@@ -1,4 +1,6 @@
 <?php
+include 'dbConnect.php';
+
 $gruppenName   = "Informatik LK";
 $gruppenMeta   = "12 Mitglieder";
 $gruppenAvatar = "IL";
@@ -38,6 +40,9 @@ $activeNav     = "kalender";
                 elseif ($month > 12) { $month = 1;  $year++; }
                 include 'components/calendar.php';
             ?>
+        </div>
+        <div>
+            <?php include 'components/groupChat.php'; ?>
         </div>
 
     </main>

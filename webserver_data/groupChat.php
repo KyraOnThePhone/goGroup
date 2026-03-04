@@ -1,13 +1,20 @@
-<?php include 'dbConnect.php'; 
+<?php
 $gruppenName   = "Informatik LK";
 $gruppenMeta   = "12 Mitglieder";
-$gruppenAvatar = "IL";?>
+$gruppenAvatar = "IL";
+?>
 <!DOCTYPE html>
 <html lang="de">
 <?php include 'components/head.php'; ?>
 <body>
 <?php include 'components/header.php'; ?>
-<main class="gruppen-page-content">
+
+<div class="gruppen-page-wrapper">
+
+    <?php include 'components/groupSidebar.php'; ?>
+
+
+ <main class="gruppen-page-content">
 
         <div class="gruppen-content-header">
             <div class="gruppen-content-header-left">
@@ -21,25 +28,33 @@ $gruppenAvatar = "IL";?>
                 </div>
             </div>
         </div>
-         <div class="messages" id="chatMessages">
-            <div class="message-group other">
+
+        <div class="groupchat">
+            <div class="groupmessages" id="chatMessages">
+            <div class="groupmessage-group other">
                 <div class="message other">Hey, hast du die Aufgabe schon erledigt? 😊</div>
-                <div class="message-time">14:32</div>
+                <div class="message-time-user">14:32 Max</div>
+              
             </div>
-            <div class="message-group me">
+            <div class="groupmessage-group me">
                 <div class="message me">Ja, fast fertig! Schicke dir das gleich.</div>
-                <div class="message-time">14:35</div>
+                <div class="message-time-user">14:35 Du</div>
+               
             </div>
-            <div class="message-group other">
+            <div class="groupmessage-group other">
                 <div class="message other">Super, danke! 🙌</div>
-                <div class="message-time">14:36</div>
+                <div class="message-time-user">14:36 Max</div>
             </div>
         </div>
-        <div class="chat-input-bar">
+        <div class="group-chat-input-bar">
             <input type="text" id="chatMsgInput" placeholder="Schreibe eine Nachricht…" autocomplete="off" />
             <button class="chat-send-btn" id="chatSendBtn" type="button" title="Senden">
                 <i class="material-icons" style="font-size:18px">send</i>
             </button>
         </div>
+        </div>
+    </main>
+</div>
 </body>
     </html>
+   

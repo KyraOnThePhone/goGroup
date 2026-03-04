@@ -31,7 +31,7 @@ function sidebarActive(string $key, string $activeNav): string {
 
     <nav class="sidebar-nav brown darken-4">
 
-        <a href="chat.php" class="sidebar-nav-item<?= sidebarActive('chat', $activeNav) ?>">
+        <a href="../gruppenansicht.php" class="sidebar-nav-item<?= sidebarActive('chat', $activeNav) ?>">
             <i class="material-icons">chat</i>
             Gruppenchat
         </a>
