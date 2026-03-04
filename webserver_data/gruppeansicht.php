@@ -1,5 +1,8 @@
-<?php //include 'actionScripts/dbConnect.php';
-include 'actionScripts/sessioncheck.php'; ?>
+<?php
+define('GOGROUP', true);
+include 'actionScripts/dbConnect.php';
+include 'actionScripts/sessioncheck.php';
+?>
 <!DOCTYPE html>
 <html lang="de">
 <?php include 'components/head.php'; ?>
