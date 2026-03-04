@@ -1,395 +1,460 @@
+-- ============================================================
+-- GoGroup Datenbank - Initialisierungsscript
+-- MSSQL Server kompatibel
+-- ============================================================
+
 -- Datenbank erstellen
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'GoGroup')
 BEGIN
-    CREATE DATABASE [GoGroup]
+    CREATE DATABASE [GoGroup];
 END
 GO
 
-USE [GoGroup]
+USE [GoGroup];
 GO
 
--- Tabellen Erstellen
+-- ============================================================
+-- TABELLEN ERSTELLEN
+-- ============================================================
+
 -- Rolle
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'ROLE' AND type = 'U')
 BEGIN
-    CREATE TABLE [ROLE](  
-        [RoleId] int IDENTITY(1,1) primary key,
-        [Name] varchar(100) NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[ROLE] (
+        [RoleId]  INT          IDENTITY(1,1) NOT NULL,
+        [Name]    VARCHAR(100) NOT NULL,
+        CONSTRAINT [PK_ROLE] PRIMARY KEY CLUSTERED ([RoleId])
+    );
+END
+GO
+
+-- Rechte / Berechtigungen
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'PERMISSIONS' AND type = 'U')
+BEGIN
+    CREATE TABLE [dbo].[PERMISSIONS] (
+        [PermissionId]   INT           IDENTITY(1,1) NOT NULL,
+        [RoleId]         INT           NOT NULL,
+        [PermissionName] NVARCHAR(100) NOT NULL,
+        CONSTRAINT [PK_PERMISSIONS]      PRIMARY KEY CLUSTERED ([PermissionId]),
+        CONSTRAINT [FK_PERMISSIONS_ROLE] FOREIGN KEY ([RoleId]) REFERENCES [dbo].[ROLE]([RoleId]) ON DELETE CASCADE
+    );
+END
+GO
 
 -- Benutzer
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'USER' AND type = 'U')
 BEGIN
-    CREATE TABLE [USER](  
-        [UserId] int IDENTITY(1,1) primary key,
-        [FirstName] varchar(100) NOT NULL,
-        [LastName] varchar(100) NOT NULL,
-        [RoleId] int FOREIGN KEY REFERENCES [ROLE](RoleId) NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[USER] (
+        [UserId]    INT          IDENTITY(1,1) NOT NULL,
+        [FirstName] VARCHAR(100) NOT NULL,
+        [LastName]  VARCHAR(100) NOT NULL,
+        [RoleId]    INT          NOT NULL,
+        CONSTRAINT [PK_USER]      PRIMARY KEY CLUSTERED ([UserId]),
+        CONSTRAINT [FK_USER_ROLE] FOREIGN KEY ([RoleId]) REFERENCES [dbo].[ROLE]([RoleId])
+    );
+END
+GO
 
 -- Login
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'LOGIN' AND type = 'U')
 BEGIN
-    CREATE TABLE [LOGIN](  
-        [LoginId] int IDENTITY(1,1) primary key,
-        [Username] varchar(100) NOT NULL,
-        [UserPassword] varchar(100) NOT NULL,
-        [UserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[LOGIN] (
+        [LoginId]      INT          IDENTITY(1,1) NOT NULL,
+        [Username]     VARCHAR(100) NOT NULL,
+        [UserPassword] VARCHAR(255) NOT NULL,   -- mind. 255 für bcrypt-Hashes
+        [UserId]       INT          NOT NULL,
+        CONSTRAINT [PK_LOGIN]      PRIMARY KEY CLUSTERED ([LoginId]),
+        CONSTRAINT [UQ_LOGIN_USERNAME] UNIQUE ([Username]),
+        CONSTRAINT [FK_LOGIN_USER] FOREIGN KEY ([UserId]) REFERENCES [dbo].[USER]([UserId]) ON DELETE CASCADE
+    );
+END
+GO
 
 -- Kalender
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'CALENDAR' AND type = 'U')
 BEGIN
-    CREATE TABLE [CALENDAR](  
-        [CalendarId] int IDENTITY(1,1) primary key
-    )
-END GO
+    CREATE TABLE [dbo].[CALENDAR] (
+        [CalendarId] INT IDENTITY(1,1) NOT NULL,
+        [Name]       VARCHAR(200) NULL,        -- optionaler Kalendernahme
+        CONSTRAINT [PK_CALENDAR] PRIMARY KEY CLUSTERED ([CalendarId])
+    );
+END
+GO
 
--- Kalender Eintrag
+-- Kalender-Eintrag
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'CALENDAR_ENTRY' AND type = 'U')
 BEGIN
-    CREATE TABLE [CALENDAR_ENTRY](  
-        [CalendarEntryId] int IDENTITY(1,1) primary key,
-        [CalendarId] int FOREIGN KEY REFERENCES [CALENDAR](CalendarId) NOT NULL,
-        [Title] varchar(1000) NOT NULL,
-        [Description] varchar(MAX),
-        [StartDate] DATETIME NOT NULL,
-        [EndDate] DATETIME NOT NULL,
-    )
-END GO
+    CREATE TABLE [dbo].[CALENDAR_ENTRY] (
+        [CalendarEntryId] INT           IDENTITY(1,1) NOT NULL,
+        [CalendarId]      INT           NOT NULL,
+        [Title]           VARCHAR(1000) NOT NULL,
+        [Description]     VARCHAR(MAX)  NULL,
+        [StartDate]       DATETIME2     NOT NULL,
+        [EndDate]         DATETIME2     NOT NULL,
+        CONSTRAINT [PK_CALENDAR_ENTRY]         PRIMARY KEY CLUSTERED ([CalendarEntryId]),
+        CONSTRAINT [FK_CALENDAR_ENTRY_CALENDAR] FOREIGN KEY ([CalendarId]) REFERENCES [dbo].[CALENDAR]([CalendarId]) ON DELETE CASCADE,
+        CONSTRAINT [CK_CALENDAR_ENTRY_DATES]   CHECK ([EndDate] >= [StartDate])
+    );
+END
+GO
 
---Gruppe
+-- Gruppe
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'GROUP' AND type = 'U')
 BEGIN
-    CREATE TABLE [GROUP](
-        [GroupId] int IDENTITY(1,1) primary key,
-        [Name] varchar(100) NOT NULL,
-        [CalendarId] int FOREIGN KEY REFERENCES [CALENDAR](CalendarId)
-    )
-END GO
+    CREATE TABLE [dbo].[GROUP] (
+        [GroupId]    INT          IDENTITY(1,1) NOT NULL,
+        [Name]       VARCHAR(100) NOT NULL,
+        [CalendarId] INT          NULL,
+        CONSTRAINT [PK_GROUP]          PRIMARY KEY CLUSTERED ([GroupId]),
+        CONSTRAINT [FK_GROUP_CALENDAR] FOREIGN KEY ([CalendarId]) REFERENCES [dbo].[CALENDAR]([CalendarId])
+    );
+END
+GO
 
--- Tabellen-Nr
+-- Tabellen-Nummern (Referenz-Lookup)
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'TABLENUMBER' AND type = 'U')
 BEGIN
-    CREATE TABLE [TABLENUMBER](
-        [TableNumber] int IDENTITY(1,1) primary key,
-        [Name] varchar(100) NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[TABLENUMBER] (
+        [TableNumber] INT          IDENTITY(1,1) NOT NULL,
+        [Name]        VARCHAR(100) NOT NULL,
+        CONSTRAINT [PK_TABLENUMBER]    PRIMARY KEY CLUSTERED ([TableNumber]),
+        CONSTRAINT [UQ_TABLENUMBER_NAME] UNIQUE ([Name])
+    );
+END
+GO
 
--- Bezug
+-- Referenz (generische Zeiger auf beliebige Tabellen)
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'REFERENCE' AND type = 'U')
 BEGIN
-    CREATE TABLE [REFERENCE](
-        [ReferenceId] int IDENTITY(1,1) primary key,
-        [RegardingTableNumber] int FOREIGN KEY REFERENCES [TABLENUMBER](TableNumber) NOT NULL,
-        [RegardingId] int NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[REFERENCE] (
+        [ReferenceId]         INT IDENTITY(1,1) NOT NULL,
+        [RegardingTableNumber] INT NOT NULL,
+        [RegardingId]         INT NOT NULL,
+        CONSTRAINT [PK_REFERENCE]              PRIMARY KEY CLUSTERED ([ReferenceId]),
+        CONSTRAINT [FK_REFERENCE_TABLENUMBER]  FOREIGN KEY ([RegardingTableNumber]) REFERENCES [dbo].[TABLENUMBER]([TableNumber]),
+        CONSTRAINT [UQ_REFERENCE]              UNIQUE ([RegardingTableNumber], [RegardingId])
+    );
+END
+GO
 
 -- Ordner
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'FOLDER' AND type = 'U')
 BEGIN
-    CREATE TABLE [FOLDER](
-        [FolderId] int IDENTITY(1,1) primary key,
-        [Name] varchar(100) NOT NULL,
-        [ParentFolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId),
-        [RegardingId] int FOREIGN KEY REFERENCES [REFERENCE](ReferenceId),
-        [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [IsRoot] BIT NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[FOLDER] (
+        [FolderId]       INT          IDENTITY(1,1) NOT NULL,
+        [Name]           VARCHAR(100) NOT NULL,
+        [ParentFolderId] INT          NULL,   -- NULL = Root-Ordner
+        [RegardingId]    INT          NULL,   -- Verknüpfung zu REFERENCE (optional)
+        [OwnerId]        INT          NOT NULL,
+        [IsRoot]         BIT          NOT NULL DEFAULT(0),
+        CONSTRAINT [PK_FOLDER]               PRIMARY KEY CLUSTERED ([FolderId]),
+        CONSTRAINT [FK_FOLDER_PARENT]        FOREIGN KEY ([ParentFolderId]) REFERENCES [dbo].[FOLDER]([FolderId]),
+        CONSTRAINT [FK_FOLDER_REFERENCE]     FOREIGN KEY ([RegardingId])    REFERENCES [dbo].[REFERENCE]([ReferenceId]),
+        CONSTRAINT [FK_FOLDER_USER]          FOREIGN KEY ([OwnerId])        REFERENCES [dbo].[USER]([UserId])
+    );
+END
+GO
 
---Projekt
+-- Projekt
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'PROJECT' AND type = 'U')
 BEGIN
-    CREATE TABLE [PROJECT](
-        [ProjectId] int IDENTITY(1,1) primary key,
-        [Title] varchar(1000) NOT NULL,
-        [DueDate] DATETIME,
-        [Description] varchar(MAX),
-        [GroupId] int FOREIGN KEY REFERENCES [GROUP](GroupId) NOT NULL,
-        [DropOfFolderId] int FOREIGN KEY REFERENCES [FOLDER](FolderId),
-        [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[PROJECT] (
+        [ProjectId]       INT           IDENTITY(1,1) NOT NULL,
+        [Title]           VARCHAR(1000) NOT NULL,
+        [Description]     VARCHAR(MAX)  NULL,
+        [DueDate]         DATETIME2     NULL,
+        [GroupId]         INT           NOT NULL,
+        [DropOfFolderId]  INT           NULL,   -- wird per Trigger befüllt
+        [OwnerId]         INT           NOT NULL,
+        CONSTRAINT [PK_PROJECT]              PRIMARY KEY CLUSTERED ([ProjectId]),
+        CONSTRAINT [FK_PROJECT_GROUP]        FOREIGN KEY ([GroupId])        REFERENCES [dbo].[GROUP]([GroupId]),
+        CONSTRAINT [FK_PROJECT_FOLDER]       FOREIGN KEY ([DropOfFolderId]) REFERENCES [dbo].[FOLDER]([FolderId]),
+        CONSTRAINT [FK_PROJECT_USER]         FOREIGN KEY ([OwnerId])        REFERENCES [dbo].[USER]([UserId])
+    );
+END
+GO
 
---Aufgabe
+-- Aufgabe
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'TASK' AND type = 'U')
 BEGIN
-    CREATE TABLE [TASK](
-        [TaskId] int IDENTITY(1,1) primary key,
-        [Title] varchar(1000) NOT NULL,
-        [Description] varchar(MAX),
-        [Status] int NOT NULL, -- 0 = offen, 1 = in Bearbeitung, 2 = erledigt
-        [DueDate] DATETIME,
-        [OwnerId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [ProjectId] int FOREIGN KEY REFERENCES [PROJECT](ProjectId) NOT NULL
-    )
-END GO
+    CREATE TABLE [dbo].[TASK] (
+        [TaskId]      INT           IDENTITY(1,1) NOT NULL,
+        [Title]       VARCHAR(1000) NOT NULL,
+        [Description] VARCHAR(MAX)  NULL,
+        [Status]      TINYINT       NOT NULL DEFAULT(0),   -- 0=offen, 1=in Bearbeitung, 2=erledigt
+        [DueDate]     DATETIME2     NULL,
+        [OwnerId]     INT           NOT NULL,
+        [ProjectId]   INT           NOT NULL,
+        CONSTRAINT [PK_TASK]         PRIMARY KEY CLUSTERED ([TaskId]),
+        CONSTRAINT [FK_TASK_USER]    FOREIGN KEY ([OwnerId])   REFERENCES [dbo].[USER]([UserId]),
+        CONSTRAINT [FK_TASK_PROJECT] FOREIGN KEY ([ProjectId]) REFERENCES [dbo].[PROJECT]([ProjectId]) ON DELETE CASCADE,
+        CONSTRAINT [CK_TASK_STATUS]  CHECK ([Status] IN (0, 1, 2))
+    );
+END
+GO
 
 -- Chat
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'CHAT' AND type = 'U')
 BEGIN
-    CREATE TABLE [CHAT](
-        [ChatId] int IDENTITY(1,1) primary key,
-        [Name] VARCHAR(1000) NOT NULL,    
-        [GroupId] int FOREIGN KEY REFERENCES [GROUP](GroupId),
-    )
-END GO
+    CREATE TABLE [dbo].[CHAT] (
+        [ChatId]  INT           IDENTITY(1,1) NOT NULL,
+        [Name]    VARCHAR(1000) NOT NULL,
+        [GroupId] INT           NULL,   -- NULL = privater / direkter Chat
+        CONSTRAINT [PK_CHAT]       PRIMARY KEY CLUSTERED ([ChatId]),
+        CONSTRAINT [FK_CHAT_GROUP] FOREIGN KEY ([GroupId]) REFERENCES [dbo].[GROUP]([GroupId]) ON DELETE SET NULL
+    );
+END
+GO
 
--- Mitglied
+-- Mitglied (User ↔ Gruppe  oder  User ↔ Chat)
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'MEMBER' AND type = 'U')
 BEGIN
-    CREATE TABLE [MEMBER](
-        [MemberId] int IDENTITY(1,1) primary key,
-        [UserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [ChatId] int FOREIGN KEY REFERENCES [CHAT](ChatId),
-        [GroupId] int FOREIGN KEY REFERENCES [GROUP](GroupId),
-    )
-END GO
+    CREATE TABLE [dbo].[MEMBER] (
+        [MemberId] INT IDENTITY(1,1) NOT NULL,
+        [UserId]   INT NOT NULL,
+        [ChatId]   INT NULL,
+        [GroupId]  INT NULL,
+        CONSTRAINT [PK_MEMBER]       PRIMARY KEY CLUSTERED ([MemberId]),
+        CONSTRAINT [FK_MEMBER_USER]  FOREIGN KEY ([UserId])  REFERENCES [dbo].[USER]([UserId])  ON DELETE CASCADE,
+        CONSTRAINT [FK_MEMBER_CHAT]  FOREIGN KEY ([ChatId])  REFERENCES [dbo].[CHAT]([ChatId]),
+        CONSTRAINT [FK_MEMBER_GROUP] FOREIGN KEY ([GroupId]) REFERENCES [dbo].[GROUP]([GroupId]),
+        -- Jeder User darf nur einmal pro Gruppe / Chat stehen
+        CONSTRAINT [UQ_MEMBER_USER_GROUP] UNIQUE ([UserId], [GroupId]),
+        CONSTRAINT [CK_MEMBER_TARGET] CHECK ([ChatId] IS NOT NULL OR [GroupId] IS NOT NULL)
+    );
+END
+GO
 
--- Datei
+-- Datei (mit temporaler Versionierung)
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'FILE' AND type = 'U')
 BEGIN
-    CREATE TABLE [FILE](
-        [FileId] int IDENTITY(1,1) NOT NULL,
-        [Name] varchar(1000) NOT NULL,
-        [FolderId] int NOT NULL,
-        [OwnerId] int NOT NULL,
-        [Content] VARBINARY(MAX) NOT NULL,
-        
+    CREATE TABLE [dbo].[FILE] (
+        [FileId]       INT           IDENTITY(1,1) NOT NULL,
+        [Name]         VARCHAR(1000) NOT NULL,
+        [FolderId]     INT           NOT NULL,
+        [OwnerId]      INT           NOT NULL,
+        [Content]      VARBINARY(MAX) NOT NULL,
         [SysStartTime] DATETIME2 GENERATED ALWAYS AS ROW START NOT NULL,
-        [SysEndTime] DATETIME2 GENERATED ALWAYS AS ROW END NOT NULL,
-        
-        PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime),
-        
-        CONSTRAINT [PK_FILE] PRIMARY KEY CLUSTERED ([FileId]),
-        CONSTRAINT [FK_FILE_FOLDER] FOREIGN KEY ([FolderId]) REFERENCES [FOLDER]([FolderId]),
-        CONSTRAINT [FK_FILE_USER] FOREIGN KEY ([OwnerId]) REFERENCES [USER]([UserId])
+        [SysEndTime]   DATETIME2 GENERATED ALWAYS AS ROW END   NOT NULL,
+        PERIOD FOR SYSTEM_TIME ([SysStartTime], [SysEndTime]),
+        CONSTRAINT [PK_FILE]        PRIMARY KEY CLUSTERED ([FileId]),
+        CONSTRAINT [FK_FILE_FOLDER] FOREIGN KEY ([FolderId]) REFERENCES [dbo].[FOLDER]([FolderId]),
+        CONSTRAINT [FK_FILE_USER]   FOREIGN KEY ([OwnerId])  REFERENCES [dbo].[USER]([UserId])
     )
-    WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.File_History))
+    WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [dbo].[FILE_History]));
 END
 GO
 
 -- Chat-Nachricht
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'CHAT_MESSAGE' AND type = 'U')
 BEGIN
-    CREATE TABLE [CHAT_MESSAGE](
-        [ChatMessageId] int IDENTITY(1,1) primary key,
-        [FromUserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [Message] varchar(MAX) NOT NULL,
-        [ChatId] int FOREIGN KEY REFERENCES [CHAT](ChatId) NOT NULL,
-        [TimeStamp] DATETIME NOT NULL,
-    )
-END GO
+    CREATE TABLE [dbo].[CHAT_MESSAGE] (
+        [ChatMessageId] INT          IDENTITY(1,1) NOT NULL,
+        [ChatId]        INT          NOT NULL,
+        [FromUserId]    INT          NOT NULL,
+        [Message]       VARCHAR(MAX) NOT NULL,
+        [TimeStamp]     DATETIME2    NOT NULL DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT [PK_CHAT_MESSAGE]      PRIMARY KEY CLUSTERED ([ChatMessageId]),
+        CONSTRAINT [FK_CHAT_MESSAGE_CHAT] FOREIGN KEY ([ChatId])     REFERENCES [dbo].[CHAT]([ChatId]) ON DELETE CASCADE,
+        CONSTRAINT [FK_CHAT_MESSAGE_USER] FOREIGN KEY ([FromUserId]) REFERENCES [dbo].[USER]([UserId])
+    );
+END
+GO
 
 -- Benachrichtigung
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'NOTIFICATION' AND type = 'U')
 BEGIN
-    CREATE TABLE [NOTIFICATION](
-        [NotificationId] int IDENTITY(1,1) primary key,
-        [ToUserId] int FOREIGN KEY REFERENCES [USER](UserId) NOT NULL,
-        [Message] varchar(MAX) NOT NULL,
-        [IsRead] BIT NOT NULL,
-        [RegardingId] int FOREIGN KEY REFERENCES [REFERENCE](ReferenceId) NOT NULL,
-        [TimeStamp] DATETIME NOT NULL
-    )
-END
-
--- Tabelle: permissions
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'PERMISSIONS' AND type = 'U')
-BEGIN
-    CREATE TABLE PERMISSIONS (
-        id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
-        RoleId INT NOT NULL,
-        PermissionName NVARCHAR(50) NOT NULL,
-        FOREIGN KEY (RoleId) REFERENCES [ROLE](RoleId) ON DELETE CASCADE
-    )
+    CREATE TABLE [dbo].[NOTIFICATION] (
+        [NotificationId] INT          IDENTITY(1,1) NOT NULL,
+        [ToUserId]       INT          NOT NULL,
+        [Message]        VARCHAR(MAX) NOT NULL,
+        [IsRead]         BIT          NOT NULL DEFAULT(0),
+        [RegardingId]    INT          NOT NULL,
+        [TimeStamp]      DATETIME2    NOT NULL DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT [PK_NOTIFICATION]             PRIMARY KEY CLUSTERED ([NotificationId]),
+        CONSTRAINT [FK_NOTIFICATION_USER]        FOREIGN KEY ([ToUserId])    REFERENCES [dbo].[USER]([UserId]) ON DELETE CASCADE,
+        CONSTRAINT [FK_NOTIFICATION_REFERENCE]   FOREIGN KEY ([RegardingId]) REFERENCES [dbo].[REFERENCE]([ReferenceId])
+    );
 END
 GO
 
--- Funktionen und Prozeduren erstellen
--- Bezug erstellen oder abrufen
-DROP PROCEDURE IF EXISTS dbo.GetOrCreateReference;
+-- ============================================================
+-- STORED PROCEDURES
+-- ============================================================
+
+-- Referenz erstellen oder abrufen
+DROP PROCEDURE IF EXISTS [dbo].[GetOrCreateReference];
 GO
 
-CREATE PROCEDURE dbo.GetOrCreateReference
+CREATE PROCEDURE [dbo].[GetOrCreateReference]
     @RegardingTableNumber INT,
-    @RegardingId INT,
-    @ReferenceId INT OUTPUT
+    @RegardingId          INT,
+    @ReferenceId          INT OUTPUT
 AS
 BEGIN
-    select @ReferenceId = ReferenceId from [dbo].[REFERENCE] where RegardingTableNumber = @RegardingTableNumber and RegardingId = @RegardingId;
+    SET NOCOUNT ON;
 
-    if @ReferenceId is null
+    SELECT @ReferenceId = [ReferenceId]
+    FROM   [dbo].[REFERENCE]
+    WHERE  [RegardingTableNumber] = @RegardingTableNumber
+      AND  [RegardingId]          = @RegardingId;
+
+    IF @ReferenceId IS NULL
     BEGIN
-        insert into [dbo].[REFERENCE] (RegardingTableNumber, RegardingId) values (@RegardingTableNumber, @RegardingId);
-        select @ReferenceId = SCOPE_IDENTITY();
+        INSERT INTO [dbo].[REFERENCE] ([RegardingTableNumber], [RegardingId])
+        VALUES (@RegardingTableNumber, @RegardingId);
+
+        SET @ReferenceId = SCOPE_IDENTITY();
     END
-
-    RETURN @ReferenceId;
 END;
-
--- Erstelle Projekt Trigger
-DROP TRIGGER IF EXISTS [dbo].[CreateProjectTrigger];
 GO
 
-CREATE TRIGGER [dbo].[CreateProjectTrigger] ON [dbo].[PROJECT]
-AFTER INSERT AS 
+-- ============================================================
+-- TRIGGER
+-- ============================================================
+
+-- Nach INSERT auf PROJECT: Abgabe-Ordner + Root-Ordner anlegen
+DROP TRIGGER IF EXISTS [dbo].[trg_Project_AfterInsert];
+GO
+
+CREATE TRIGGER [dbo].[trg_Project_AfterInsert]
+ON [dbo].[PROJECT]
+AFTER INSERT
+AS
 BEGIN
     SET NOCOUNT ON;
-    -- Variablen deklarieren
-    DECLARE @ProjectId int, @OwnerId int, @Title varchar(1000);
-    DECLARE @DropOfFolderResultId int, @ProjectRererenceId int;
 
-    SELECT @ProjectId = ProjectId, @OwnerId = OwnerId, @Title = Title FROM inserted;
+    DECLARE @ProjectId          INT;
+    DECLARE @OwnerId            INT;
+    DECLARE @Title              VARCHAR(1000);
+    DECLARE @DropOfFolderId     INT;
+    DECLARE @ProjectReferenceId INT;
 
-    -- Projektabgabeordner erstellen
-    INSERT INTO [dbo].[FOLDER] ([Name], [OwnerId], [IsRoot]) VALUES (
-        'Projektabgabe - {' + CAST(@ProjectId AS varchar) + '} - ' + @Title,
+    SELECT @ProjectId = [ProjectId],
+           @OwnerId   = [OwnerId],
+           @Title     = [Title]
+    FROM   inserted;
+
+    -- Abgabe-Ordner anlegen
+    INSERT INTO [dbo].[FOLDER] ([Name], [OwnerId], [IsRoot])
+    VALUES (
+        'Projektabgabe - [' + CAST(@ProjectId AS VARCHAR) + '] - ' + @Title,
         @OwnerId,
-        1 -- Is Root
+        1
     );
-    SELECT @DropOfFolderResultId = SCOPE_IDENTITY();
+    SET @DropOfFolderId = SCOPE_IDENTITY();
 
-    -- Projekt Updaten
-    UPDATE [dbo].[PROJECT] SET DropOfFolderId = @DropOfFolderResultId WHERE ProjectId = @ProjectId;
+    -- Projekt mit dem neuen Ordner verknüpfen
+    UPDATE [dbo].[PROJECT]
+    SET    [DropOfFolderId] = @DropOfFolderId
+    WHERE  [ProjectId]      = @ProjectId;
 
-    -- Projekt-Referenz erstellen
-    EXEC dbo.GetOrCreateReference 
-        @RegardingTableNumber = 1, -- PROJECT
-        @RegardingId = @ProjectId,
-        @ReferenceId = @ProjectRererenceId OUTPUT
+    -- Generische Referenz auf das Projekt anlegen
+    EXEC [dbo].[GetOrCreateReference]
+        @RegardingTableNumber = 1,   -- PROJECT
+        @RegardingId          = @ProjectId,
+        @ReferenceId          = @ProjectReferenceId OUTPUT;
 
-    -- Root-Ordner mit Projekt-Referenz erstellen
-    INSERT INTO [dbo].[FOLDER] ([Name], [OwnerId], [IsRoot], [RegardingId]) VALUES (
-        'Root',
-        @OwnerId,
-        1, -- Is Root
-        @ProjectRererenceId
-    );
+    -- Root-Ordner für Projektdateien anlegen
+    INSERT INTO [dbo].[FOLDER] ([Name], [OwnerId], [IsRoot], [RegardingId])
+    VALUES ('Root', @OwnerId, 1, @ProjectReferenceId);
 END;
+GO
 
--- Befehl zum Löschen der Versionierungstabelle, falls sie existiert
--- -- 1. System-Versionierung ausschalten
--- ALTER TABLE [dbo].[FILE] SET (SYSTEM_VERSIONING = OFF);
--- GO
+-- ============================================================
+-- STAMMDATEN / TESTDATEN
+-- ============================================================
 
--- -- 2. Beide Tabellen löschen
--- DROP TABLE [dbo].[FILE];        -- Die aktuelle Tabelle
--- DROP TABLE [dbo].[FILE_History]; -- Die History-Tabelle (Name kann variieren*)
--- GO
-
-
--- Standard / Test Datensätze erstellen
 -- Rollen
 IF (SELECT COUNT(*) FROM [dbo].[ROLE]) = 0
 BEGIN
-    INSERT INTO [dbo].[ROLE] (Name) VALUES 
-        ('Admin'), -- 1
-        ('Schüler'), -- 2
-        ('Lehrer') -- 3
+    INSERT INTO [dbo].[ROLE] ([Name]) VALUES
+        ('Admin'),   -- RoleId 1
+        ('Schüler'), -- RoleId 2
+        ('Lehrer');  -- RoleId 3
 END
 GO
 
--- Rechte
+-- Berechtigungen
 IF (SELECT COUNT(*) FROM [dbo].[PERMISSIONS]) = 0
 BEGIN
-    INSERT INTO [dbo].[PERMISSIONS] (RoleId, PermissionName) VALUES
-        (1,'admin'), -- Admin hat alle Rechte
-        (2,'user'), -- Schüler hat nur normale Rechte
-        (3,'teacher') -- Lehrer hat erweiterte Rechte, aber nicht alle wie Admin
+    INSERT INTO [dbo].[PERMISSIONS] ([RoleId], [PermissionName]) VALUES
+        (1, 'admin'),
+        (2, 'user'),
+        (3, 'teacher');
 END
 GO
 
 -- Benutzer
 IF (SELECT COUNT(*) FROM [dbo].[USER]) = 0
 BEGIN
-    INSERT INTO [dbo].[USER] (FirstName,LastName,RoleId) VALUES 
-        ('Luca','Brüning',1),
-        ('Simon','Krainert',1)
+    INSERT INTO [dbo].[USER] ([FirstName], [LastName], [RoleId]) VALUES
+        ('Luca',  'Brüning',  1),
+        ('Simon', 'Krainert', 1);
 END
 GO
 
--- Login
+-- Logins (bcrypt-Hashes)
 IF (SELECT COUNT(*) FROM [dbo].[LOGIN]) = 0
 BEGIN
-    INSERT INTO [dbo].[LOGIN] (Username,UserPassword,UserId) VALUES 
-        ('luca.bruening','$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O',1),
-        ('simon.krainert','$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC',2)
+    INSERT INTO [dbo].[LOGIN] ([Username], [UserPassword], [UserId]) VALUES
+        ('luca.bruening',  '$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O', 1),
+        ('simon.krainert', '$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC', 2);
 END
 GO
 
--- Tabellen Nr.
+-- Tabellen-Nummern (Lookup für generische Referenzen)
 IF (SELECT COUNT(*) FROM [dbo].[TABLENUMBER]) = 0
 BEGIN
-    INSERT INTO [dbo].[TABLENUMBER] (Name) VALUES 
-        ('PROJECT'), -- 1
-        ('TASK'), -- 2
-        ('CHAT'), -- 3
-        ('FOLDER'), -- 4
-        ('FILE'), -- 5
-        ('GROUP'), -- 6
-        ('CALENDAR'), -- 7
-        ('CALENDAR_ENTRY') -- 8
+    INSERT INTO [dbo].[TABLENUMBER] ([Name]) VALUES
+        ('PROJECT'),        -- 1
+        ('TASK'),           -- 2
+        ('CHAT'),           -- 3
+        ('FOLDER'),         -- 4
+        ('FILE'),           -- 5
+        ('GROUP'),          -- 6
+        ('CALENDAR'),       -- 7
+        ('CALENDAR_ENTRY'); -- 8
 END
 GO
 
 -- Gruppen
 IF (SELECT COUNT(*) FROM [dbo].[GROUP]) = 0
 BEGIN
-    INSERT INTO [dbo].[GROUP] ([Name]) VALUES 
+    INSERT INTO [dbo].[GROUP] ([Name]) VALUES
         ('Komm in die Gruppe xD'),
         ('GoGroup Test Gruppe'),
         ('Die Normalen'),
-        ('Die Coolen')
+        ('Die Coolen');
 END
+GO
 
--- Mitglieder der Gruppen
+-- Gruppen-Mitglieder
 IF (SELECT COUNT(*) FROM [dbo].[MEMBER]) = 0
 BEGIN
-    INSERT INTO [dbo].[MEMBER] (UserId, GroupId) VALUES 
-        (1, 1), -- Luca in Gruppe 1
-        (2, 1), -- Simon in Gruppe 1
-        (1, 2), -- Luca in Gruppe 2
-        (2, 2)  -- Simon in Gruppe 2
+    INSERT INTO [dbo].[MEMBER] ([UserId], [GroupId]) VALUES
+        (1, 1),
+        (2, 1),
+        (1, 2),
+        (2, 2);
 END
+GO
 
 -- Projekte
 IF (SELECT COUNT(*) FROM [dbo].[PROJECT]) = 0
 BEGIN
-    INSERT INTO [dbo].[PROJECT] 
-    (
-        [Title],
-        [DueDate],
-        [Description],
-        [GroupId],
-        [DropOfFolderId],
-        [OwnerId]
-    )
-    VALUES 
-        ('Mathe Projekt', '2024-12-31', 'Beschreibung für Projekt 1', 1, NULL, 1),
-        ('GoGroup Projekt', NULL, 'Beschreibung für Projekt 2', 1, NULL, 2)
+    INSERT INTO [dbo].[PROJECT] ([Title], [DueDate], [Description], [GroupId], [DropOfFolderId], [OwnerId]) VALUES
+        ('Mathe Projekt',   '2024-12-31', 'Beschreibung für Projekt 1',  1, NULL, 1),
+        ('GoGroup Projekt', NULL,         'Beschreibung für Projekt 2',  1, NULL, 2);
 END
+GO
 
 -- Aufgaben
 IF (SELECT COUNT(*) FROM [dbo].[TASK]) = 0
 BEGIN
-    INSERT INTO [dbo].[TASK] 
-    (
-        [Title],
-        [Description],
-        [Status],
-        [DueDate],
-        [OwnerId],
-        [ProjectId]
-    )
-    VALUES 
-        ('Mathe Aufgabe 1', 'Beschreibung für Aufgabe 1', 0, '2024-11-30', 1, 1),
-        ('Mathe Aufgabe 2', 'Beschreibung für Aufgabe 2', 0, '2024-12-15', 2, 1),
-        ('GoGroup Aufgabe 1', 'Beschreibung für GoGroup Aufgabe 1', 0, NULL, 1, 2)
+    INSERT INTO [dbo].[TASK] ([Title], [Description], [Status], [DueDate], [OwnerId], [ProjectId]) VALUES
+        ('Mathe Aufgabe 1',    'Beschreibung für Aufgabe 1',           0, '2024-11-30', 1, 1),
+        ('Mathe Aufgabe 2',    'Beschreibung für Aufgabe 2',           0, '2024-12-15', 2, 1),
+        ('GoGroup Aufgabe 1',  'Beschreibung für GoGroup Aufgabe 1',   0, NULL,         1, 2);
 END
+GO
