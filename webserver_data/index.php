@@ -1,4 +1,3 @@
-<?php include 'actionScripts/sessioncheck.php'; ?>
 <!DOCTYPE html>
 <html lang="de">
 <?php include 'components/head.php'; ?>
