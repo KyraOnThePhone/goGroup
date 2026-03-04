@@ -1,4 +1,6 @@
 <?php
+include 'dbConnect.php';
+
 $gruppenName   = "Informatik LK";
 $gruppenMeta   = "12 Mitglieder";
 $gruppenAvatar = "IL";

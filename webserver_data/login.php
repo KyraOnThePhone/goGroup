@@ -2,7 +2,7 @@
 <html lang="de">
 <?php include 'components/head.php'; ?>
 <body>
-<?php include 'components/header.php'; ?>
+<?php $hideNavButtons = true; include 'components/header.php'; ?>
 <main style="width:100%">
     <div class="login-container">
         <div class="login-box">

@@ -1,21 +1,29 @@
 <?php
-include 'dbConnect.php';
+if (($hideNavButtons ?? false) == false) {
+    $hideNavButtons = false;
+    
+    $groups = sqlsrv_query($conn,"
+        SELECT 
+            me.[GroupId] AS GroupId,
+            COUNT(m2.[GroupId]) AS MemberCount,
+            gr.[Name] AS GroupName
+        FROM [dbo].[MEMBER] as me
 
-$groups = sqlsrv_query($conn,"
-    SELECT 
-        g.[GroupId],
-        g.[Name], 
-        COUNT(m.[MemberId]) AS MemberCount
-    FROM [GROUP] AS g
+        LEFT JOIN [MEMBER] AS m2 ON m2.[GroupId] = me.[GroupId]
+        LEFT JOIN [GROUP] AS gr ON gr.[GroupId] = me.[GroupId]
+        WHERE me.[UserId] = 1 GROUP BY me.[GroupId], gr.[Name]");
+    if ($groups === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }
 
-    LEFT JOIN [MEMBER] AS m ON m.[GroupId] = g.[GroupId] GROUP BY g.[GroupId], g.[Name]");
-if ($groups === false) {
-    die(print_r(sqlsrv_errors(), true));
+    $groups_array = [];
+    while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
+        $groups_array[] = $row;
+    }
 }
-
-$groups_array = [];
-while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
-    $groups_array[] = $row;
+else
+{
+    $hideNavButtons = true;
 }
 ?>
 <header>
@@ -28,7 +36,7 @@ while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
             <a href="#" data-target="mobile-nav" class="sidenav-trigger right">
                 <i class="material-icons">menu</i>
             </a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <ul id="nav-mobile" class="right hide-on-med-and-down" style="<?php echo $hideNavButtons ? 'display:none;' : '' ?>">
                 <li class="gruppen-nav-item">
                     <a href="gruppenansicht.php" id="gruppenNavLink">
                         <i class="material-icons left">group</i>Gruppen
@@ -44,11 +52,11 @@ while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
                             <ul class="gruppen-list" id="gruppenList">
                                 <?php foreach($groups_array as $row): ?>
                                     <?php
-                                        $groupName = $row['Name'];
-                                        $avatarColor = '#' . substr(md5($row['Name']), 0, 6);;
+                                        $groupName = $row['GroupName'];
+                                        $avatarColor = '#' . substr(md5($row['GroupName']), 0, 6);;
                                         ?>
-                                    <li class="gruppen-list-item" data-name="<?php echo $groupName ?>">
-                                        <div class="gruppen-avatar" style="background:<?php echo $avatarColor ?>"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($row['Name'], 0, 2))); ?></div>
+                                    <li class="gruppen-list-item" data-name="<?php echo $groupName ?>" data-id="<?php echo $row['GroupId'] ?>">
+                                        <div class="gruppen-avatar" style="background:<?php echo $avatarColor ?>"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($row['GroupName'], 0, 2))); ?></div>
                                         <div class="gruppen-info">
                                             <div class="gruppen-name"><?php echo $groupName ?></div>
                                             <div class="gruppen-meta"><?php echo $row["MemberCount"] ?> Mitglieder</div>

@@ -1,4 +1,4 @@
-<?php include 'actionScripts/sessioncheck.php'; ?> 
+<?php include 'dbConnect.php'; ?>
 <!DOCTYPE html>
 <html lang="de">
 <?php include 'components/head.php'; ?>
