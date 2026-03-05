@@ -2,6 +2,9 @@
 $gruppenName   = "Gruppenübersicht";
 // $gruppenMeta   = "12 Mitglieder";
 // $gruppenAvatar = "IL";
+define('GOGROUP', true);
+include 'actionScripts/dbConnect.php';
+include 'actionScripts/sessioncheck.php';
 ?>
 <!DOCTYPE html>
 <html lang="de">
