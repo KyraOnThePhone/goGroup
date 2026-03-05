@@ -1,4 +1,5 @@
 <?php
+/*
 $groups = sqlsrv_query($conn,"
     SELECT 
         me.[GroupId] AS GroupId,
@@ -16,7 +17,7 @@ if ($groups === false) {
 $groups_array = [];
 while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
     $groups_array[] = $row;
-}
+} */
 ?>
 <header>
     <nav class="nav navbar main-nav">
@@ -59,7 +60,7 @@ while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
                                 <?php endforeach; ?>
                             </ul>
                             <div class="gruppen-no-results hidden" id="gruppenNoResults">Keine Gruppen gefunden</div>
-                            <a href="gruppen/erstellen.php" class="gruppen-create-btn">
+                            <a href="../gruppenErstellen.php" class="gruppen-create-btn">
                                 <span class="create-icon"><i class="material-icons">add</i></span>
                                 Neue Gruppe erstellen
                             </a>
