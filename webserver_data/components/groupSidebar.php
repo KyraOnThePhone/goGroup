@@ -62,7 +62,7 @@ function sidebarActive(string $key, string $activeNav): string {
         <div class="sidebar-divider"></div>
         <div class="sidebar-section-label">Verwaltung</div>
 
-        <a href="einstellungen.php" class="sidebar-nav-item<?= sidebarActive('einstellungen', $activeNav) ?>">
+        <a href="./settings.php" class="sidebar-nav-item<?= sidebarActive('einstellungen', $activeNav) ?>">
             <i class="material-icons">settings</i>
             Einstellungen
         </a>
