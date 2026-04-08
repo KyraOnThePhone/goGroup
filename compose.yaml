@@ -15,6 +15,9 @@ services:
             WEB_DOCUMENT_ROOT: /var/www/html
         extra_hosts:
           - "host.docker.internal:host-gateway"
+
+        depends_on:
+            - database
        
 
     database:
