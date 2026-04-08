@@ -2166,23 +2166,20 @@ footer.page-footer.main-footer .footer-copyright {
     padding-bottom: 50px;
     border-radius: 10px;
     background-color: #6b5d42;
-font-style: var(--gold-dark);
+    font-family: 'DM Sans', sans-serif;
 }
 
 .gruppen-list{
     display: flex;         
     flex-direction: row;    
     gap: 20px; 
-    flex-wrap: wrap;   
+    flex-wrap: wrap;
+    width: 100%;   
              
     
 }
 .gruppen-ansicht-container{
-  padding: 30px;
-  width: 100%;
-  
-  
-  
+  padding: 30px;  
 }
     
 
