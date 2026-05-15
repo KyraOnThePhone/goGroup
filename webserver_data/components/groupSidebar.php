@@ -54,7 +54,7 @@ function sidebarActive(string $key, string $activeNav): string {
             Aufgaben
         </a>
 
-        <a href="ressourcen.php" class="sidebar-nav-item<?= sidebarActive('ressourcen', $activeNav) ?>">
+        <a href="../ressourcen.php" class="sidebar-nav-item<?= sidebarActive('ressourcen', $activeNav) ?>">
             <i class="material-icons">attach_file</i>
             Ressourcen
         </a>
