@@ -102,9 +102,10 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'GROUP' AND type = 'U')
 BEGIN
     CREATE TABLE [dbo].[GROUP] (
-        [GroupId]    INT          IDENTITY(1,1) NOT NULL,
-        [Name]       VARCHAR(100) NOT NULL,
-        [CalendarId] INT          NULL,
+        [GroupId]       INT          IDENTITY(1,1) NOT NULL,
+        [Name]          VARCHAR(100) NOT NULL,
+        [Description]   VARCHAR(MAX) NULL,
+        [CalendarId]    INT          NULL,
         CONSTRAINT [PK_GROUP]          PRIMARY KEY CLUSTERED ([GroupId]),
         CONSTRAINT [FK_GROUP_CALENDAR] FOREIGN KEY ([CalendarId]) REFERENCES [dbo].[CALENDAR]([CalendarId])
     );

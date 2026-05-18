@@ -1,3 +1,13 @@
+<?php
+define('GOGROUP', true);
+include 'actionScripts/dbConnect.php';
+include 'actionScripts/sessioncheck.php';
+
+// Daten laden
+include 'actionScripts/groupDataLoader.php';
+$activeNav = "ressourcen";
+?>
+
 <!DOCTYPE html>
 <html lang="de">
 <?php 

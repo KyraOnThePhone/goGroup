@@ -1,10 +1,11 @@
 <?php
-#include 'actionScripts/dbConnect.php';
+define('GOGROUP', true);
+include 'actionScripts/dbConnect.php';
 include 'actionScripts/sessioncheck.php';
-$gruppenName   = "Informatik LK 12b";
-$gruppenMeta   = "8 Mitglieder";
-$gruppenAvatar = "IK";
-$activeNav     = "einstellungen";
+
+// Daten laden
+include 'actionScripts/groupDataLoader.php';
+$activeNav = "einstellungen";
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -20,7 +21,7 @@ $activeNav     = "einstellungen";
 
         <div class="gruppen-content-header">
             <div class="gruppen-content-header-left">
-                <div class="gruppen-content-avatar">IK</div>
+                <div class="gruppen-content-avatar"><? echo $gruppenAvatar ?></div>
                 <div>
                     <h1 class="gruppen-content-title">Einstellungen</h1>
                     <div class="gruppen-content-meta">
@@ -53,7 +54,7 @@ $activeNav     = "einstellungen";
                             </label>
                             <div class="gs-input-wrap">
                                 <input type="text" id="gs_name" class="gs-input"
-                                       value="Informatik LK 12b" maxlength="80" autocomplete="off">
+                                       value="<? echo $gruppenName ?>" maxlength="80" autocomplete="off">
                                 <span class="gs-char-counter" id="gs_name_counter">18 / 80</span>
                             </div>
                             <div class="gs-field-error" id="err_name"></div>
@@ -64,7 +65,7 @@ $activeNav     = "einstellungen";
                                 Beschreibung <span class="gs-optional">(optional)</span>
                             </label>
                             <textarea id="gs_beschreibung" class="gs-textarea" rows="3"
-                                      maxlength="500" placeholder="Worum geht es in dieser Gruppe?">Leistungskurs Informatik, Jahrgang 12b. Hier werden Aufgaben und Materialien geteilt.</textarea>
+                                      maxlength="500" placeholder="Worum geht es in dieser Gruppe?"><? echo $groupDescription ?></textarea>
                             <div class="gs-char-counter gs-char-counter--right">
                                 <span id="gs_beschr_counter">80</span> / 500
                             </div>
@@ -160,20 +161,20 @@ $activeNav     = "einstellungen";
             <div class="gs-side-col">
                 <div class="gs-overview-card">
                     <div class="gs-overview-header">
-                        <div class="gs-overview-avatar" id="overviewAvatar">IK</div>
+                        <div class="gs-overview-avatar" id="overviewAvatar"><? echo $gruppenAvatar ?></div>
                         <div class="gs-overview-info">
-                            <div class="gs-overview-name" id="overviewName">Informatik LK 12b</div>
+                            <div class="gs-overview-name" id="overviewName"><? echo $groupName ?></div>
                             <div class="gs-overview-desc" id="overviewDesc">Leistungskurs Informatik, Jahrgang 12b.</div>
                         </div>
                     </div>
                     <div class="gs-overview-stats">
                         <div class="gs-stat">
-                            <div class="gs-stat-value" id="statMember">8</div>
+                            <div class="gs-stat-value" id="statMember"><? echo $groupCount ?></div>
                             <div class="gs-stat-label">Mitglieder</div>
                         </div>
                         <div class="gs-stat-divider"></div>
                         <div class="gs-stat">
-                            <div class="gs-stat-value">3</div>
+                            <div class="gs-stat-value">X</div>
                             <div class="gs-stat-label">Aufgaben</div>
                         </div>
                     </div>

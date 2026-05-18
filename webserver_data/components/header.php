@@ -1,23 +1,12 @@
 <?php
-/*
-$groups = sqlsrv_query($conn,"
-    SELECT 
-        me.[GroupId] AS GroupId,
-        COUNT(m2.[GroupId]) AS MemberCount,
-        gr.[Name] AS GroupName
-    FROM [dbo].[MEMBER] as me
-
-    LEFT JOIN [MEMBER] AS m2 ON m2.[GroupId] = me.[GroupId]
-    LEFT JOIN [GROUP] AS gr ON gr.[GroupId] = me.[GroupId]
-    WHERE me.[UserId] = 1 GROUP BY me.[GroupId], gr.[Name]");
-if ($groups === false) {
-    die(print_r(sqlsrv_errors(), true));
-}
-
 $groups_array = [];
-while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
-    $groups_array[] = $row;
-} */
+
+// $hideNavButtons -> Keine Abfrage
+if (!isset($hideNavButtons) || $hideNavButtons !== true) {
+    if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true && isset($_SESSION['user_id'])) {
+        $groups_array = GetUserGroups($_SESSION['user_id']) ?? [];
+    }
+}
 ?>
 <header>
     <nav class="nav navbar main-nav">
@@ -47,16 +36,19 @@ while ($row = sqlsrv_fetch_array($groups, SQLSRV_FETCH_ASSOC)) {
                                 <?php foreach($groups_array as $row): ?>
                                     <?php
                                         $groupName = $row['GroupName'];
-                                        $avatarColor = '#' . substr(md5($groupName), 0, 6);;
+                                        $avatarColor = '#' . substr(md5($groupName), 0, 6);
+                                        $groupId = $row["GroupId"];
                                         ?>
-                                    <li class="gruppen-list-item" data-name="<?php echo $groupName ?>">
-                                        <div class="gruppen-avatar" style="background:<?php echo $avatarColor ?>"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($groupName, 0, 2))); ?></div>
-                                        <div class="gruppen-info">
-                                            <div class="gruppen-name"><?php echo $groupName ?></div>
-                                            <div class="gruppen-meta"><?php echo $row["MemberCount"] ?> Mitglieder</div>
-                                        </div>
-                                        <i class="material-icons gruppen-arrow">chevron_right</i>
-                                    </li>
+                                        <a href="group.php?groupId=<?= $groupId ?>">
+                                            <li class="gruppen-list-item" data-name="<?php echo $groupName ?>">
+                                                <div class="gruppen-avatar" style="background:<?php echo $avatarColor ?>"><?php echo GenerateAvatarByName($groupName) ?></div>
+                                                <div class="gruppen-info">
+                                                    <div class="gruppen-name"><?php echo $groupName ?></div>
+                                                    <div class="gruppen-meta"><?php echo $row["MemberCount"] ?> Mitglieder</div>
+                                                </div>
+                                                <i class="material-icons gruppen-arrow">chevron_right</i>
+                                            </li>
+                                        </a>
                                 <?php endforeach; ?>
                             </ul>
                             <div class="gruppen-no-results hidden" id="gruppenNoResults">Keine Gruppen gefunden</div>
