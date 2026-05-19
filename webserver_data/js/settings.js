@@ -367,7 +367,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('btn_leave').addEventListener('click', () => {
-        openConfirm({ title: 'Gruppe verlassen?', desc: 'Du verlässt die Gruppe. Deine bisherigen Inhalte bleiben erhalten.', okLabel: 'Ja, verlassen', okIcon: 'exit_to_app', onOk: () => showToast('Du hast die Gruppe verlassen (Dummy)') });
+        openConfirm(
+            {
+                title: 'Gruppe verlassen?',
+                desc: 'Du verlässt die Gruppe. Deine bisherigen Inhalte bleiben erhalten.',
+                okLabel: 'Ja, verlassen',
+                okIcon: 'exit_to_app',
+                onOk: () => {
+                    const params = new URLSearchParams();
+                    params.append('groupId', groupId);
+
+                    fetch('actionScripts/leaveGroup.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: params
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Gruppe erfolgreich verlassen');
+                            window.location.href = 'index.php';
+                        } else {
+                            showToast('Fehler: ' + data.message);
+                        }
+                    });
+                }
+            }
+        );
     });
 
     document.getElementById('btn_delete').addEventListener('click', () => {
