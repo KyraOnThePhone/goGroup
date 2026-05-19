@@ -31,6 +31,7 @@ include 'actionScripts/sessioncheck.php';
                                 <i class="material-icons gruppen-search-icon">search</i>
                                 <input type="text" id="gruppenSearch" placeholder="Gruppe suchen…" autocomplete="off" />
                             </div>
+        </div>
 
           <ul class="gruppen-list">
     <li class="gruppen-item"><a href="#">Gruppe 1</a></li>
@@ -40,6 +41,8 @@ include 'actionScripts/sessioncheck.php';
     <li class="gruppen-item"><a href="#">Gruppe 5</a></li>
     <li class="gruppen-item"><a href="#">Gruppe 6</a></li>
 </ul>
+
+<div class="gruppe-erstellen">Gruppe erstellen</div>
     </main>
 </div>
 </body>
