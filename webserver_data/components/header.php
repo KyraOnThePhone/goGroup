@@ -36,7 +36,7 @@ if (!isset($hideNavButtons) || $hideNavButtons !== true) {
                                 <?php foreach($groups_array as $row): ?>
                                     <?php
                                         $groupName = $row['GroupName'];
-                                        $avatarColor = '#' . substr(md5($groupName), 0, 6);
+                                        $avatarColor = GenerateAvatarColor($groupName);
                                         $groupId = $row["GroupId"];
                                         ?>
                                         <a href="group.php?groupId=<?= $groupId ?>">
@@ -52,7 +52,7 @@ if (!isset($hideNavButtons) || $hideNavButtons !== true) {
                                 <?php endforeach; ?>
                             </ul>
                             <div class="gruppen-no-results hidden" id="gruppenNoResults">Keine Gruppen gefunden</div>
-                            <a href="../gruppenErstellen.php" class="gruppen-create-btn">
+                            <a href="../gruppenErstellen.php" class="gruppen-create-btn" style="min-height: 50px;">
                                 <span class="create-icon"><i class="material-icons">add</i></span>
                                 Neue Gruppe erstellen
                             </a>

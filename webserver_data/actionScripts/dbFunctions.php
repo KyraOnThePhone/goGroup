@@ -32,7 +32,10 @@ function GetSingleRecord($sql, $params = array()) {
 }
 
 function GetUserGroups($userId) {
-    $sql = "SELECT me.[GroupId], COUNT(m2.[GroupId]) AS MemberCount, gr.[Name] AS GroupName
+    $sql = "SELECT 
+                me.[GroupId],
+                COUNT(m2.[GroupId]) AS MemberCount,
+                gr.[Name] AS GroupName
             FROM [dbo].[MEMBER] as me
             LEFT JOIN [MEMBER] AS m2 ON m2.[GroupId] = me.[GroupId]
             LEFT JOIN [GROUP] AS gr ON gr.[GroupId] = me.[GroupId]
@@ -48,6 +51,7 @@ function GetGroupDetails($groupId){
     $sql = 'SELECT
             G."GroupId",
             G.Name,
+            G.Description,
             (SELECT COUNT(*) FROM "MEMBER" WHERE "GroupId" = G."GroupId") AS MemberCount
         FROM [dbo].[GROUP] AS G
         WHERE G."GroupId" = ?';

@@ -585,6 +585,8 @@ footer.page-footer.main-footer .footer-copyright {
     transform: translateY(-8px);
     transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
     z-index: 1100;
+    top: 100%;
+    line-height: normal;
 }
 
 .gruppen-popup.visible { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -2603,3 +2605,5 @@ footer.page-footer.main-footer .footer-copyright {
 @media(max-width:768px){
     .res-main-layout.panel-open .res-explorer{display:none;}
 }
+
+
