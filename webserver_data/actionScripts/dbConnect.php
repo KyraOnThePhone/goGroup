@@ -15,3 +15,7 @@ $conn = sqlsrv_connect($serverName, $connectionInfo);
 if ($conn === false) {
     die(json_encode(["error" => sqlsrv_errors()]));
 }
+
+include_once __DIR__ . '/utils.php';
+include_once __DIR__ . '/dbFunctions.php';
+?>

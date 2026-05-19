@@ -1,11 +1,11 @@
 <?php
-//define('GOGROUP', true);
-//include 'actionScripts/dbConnect.php';
+define('GOGROUP', true);
+include 'actionScripts/dbConnect.php';
 include 'actionScripts/sessioncheck.php';
-$gruppenName   = "Informatik LK";
-$gruppenMeta   = "12 Mitglieder";
-$gruppenAvatar = "IL";
-$activeNav     = "aufgaben";
+
+// Daten laden
+include 'actionScripts/groupDataLoader.php';
+$activeNav = "aufgaben";
 ?>
 <!DOCTYPE html>
 <html lang="de">

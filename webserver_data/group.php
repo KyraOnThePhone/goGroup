@@ -3,10 +3,9 @@ define('GOGROUP', true);
 include 'actionScripts/dbConnect.php';
 include 'actionScripts/sessioncheck.php';
 
-$gruppenName   = "Informatik LK";
-$gruppenMeta   = "12 Mitglieder";
-$gruppenAvatar = "IL";
-$activeNav     = "kalender";
+// Daten laden
+include 'actionScripts/groupDataLoader.php';
+$activeNav = "kalender";
 ?>
 <!DOCTYPE html>
 <html lang="de">
