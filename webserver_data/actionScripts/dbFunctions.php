@@ -46,8 +46,6 @@ function GetUserGroups($userId) {
 }
 
 function GetGroupDetails($groupId){
-    global $conn;
-
     $sql = 'SELECT
             G."GroupId",
             G.Name,
@@ -58,4 +56,86 @@ function GetGroupDetails($groupId){
     return GetSingleRecord($sql,[$groupId]);
 }
 
+function GetGroupMembers($groupId){
+    $sql = 'SELECT * FROM [dbo].[MEMBER] WHERE GroupId = ?';
+    return GetMultipleRecords($sql,$groupId);
+}
+
+function GetGroupMembersFormatted($groupId) {
+    global $conn;
+
+    $sql = 'SELECT 
+                m.[MemberId], 
+                m.[UserId], 
+                u.[FirstName],
+                u.[LastName],
+                R."Name" AS RoleName
+            FROM [dbo].[MEMBER] AS m
+            INNER JOIN [dbo].[USER] AS u ON u.[UserId] = m.[UserId]
+            JOIN "ROLE" AS R ON r."RoleId" = u."RoleId"
+            WHERE m.[GroupId] = ?';
+            
+    $members = GetMultipleRecords($sql, array($groupId));
+    $formattedMembers = [];
+    
+    foreach ($members as $member) {
+        $firstName = $member['FirstName'] ?? '';
+        $lastName  = $member['LastName'] ?? '';
+        $fullName  = trim($firstName . ' ' . $lastName);
+        $role = $member['RoleName'];
+        
+        if (empty($fullName)) {
+            $fullName = 'Unbekanntes Mitglied';
+        }
+
+        $formattedMembers[] = [
+            'id'      => $member['UserId'],
+            'name'    => $fullName,
+            'kuerzel' => GenerateAvatarByName($fullName), 
+            'color'   => GenerateAvatarColor($fullName), 
+            'role'    => strtolower($role),
+            'roleDisplayName' => $member["RoleName"]
+        ];
+    }
+    
+    return $formattedMembers;
+}
+
+function GetAllUsers(){
+    $sql = 'SELECT
+            U."UserId",
+            U."FirstName",
+            U."LastName",
+            R."Name" AS RoleName
+
+        FROM "USER" AS U
+        JOIN "ROLE" R ON R."RoleId" = U."RoleId"';
+    return GetMultipleRecords($sql);
+}
+
+function GetAllUsersFormatted() {
+    $users = GetAllUsers();
+    
+    $formattedUsers = [];
+    
+    foreach ($users as $user) {
+        $userId   = $user['UserId'] ?? $user['id'];
+        $fullName = $user["FirstName"];
+
+        if ($user["LastName"]){
+            $fullName = $fullName . " " . $user["LastName"];
+        }
+        
+        $formattedUsers[] = [
+            'id'      => intval($userId),
+            'name'    => $fullName,
+            'kuerzel' => GenerateAvatarByName($fullName),
+            'color'   => GenerateAvatarColor($fullName),
+            'role'    => strtolower($user['RoleName']),
+            'roleDisplayName' => $user["RoleName"]
+        ];
+    }
+    
+    return $formattedUsers;
+}
 ?>

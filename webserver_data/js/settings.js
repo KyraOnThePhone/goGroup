@@ -1,32 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    M.Sidenav.init(document.querySelectorAll('.sidenav'));
+    document.querySelectorAll('.sidenav');
 
     let isDirty = false;
     let pendingHref = null;
     function markDirty() { isDirty = true; }
     function markClean() { isDirty = false; }
 
-    const allMembers = [
-        { id: 1,  name: 'Max Mustermann',  kuerzel: 'MM', color: '#7a653a', role: 'admin'  },
-        { id: 2,  name: 'Erika Muster',    kuerzel: 'EM', color: '#8b0000', role: 'member' },
-        { id: 3,  name: 'Luca Bauer',      kuerzel: 'LB', color: '#4a7c59', role: 'member' },
-        { id: 4,  name: 'Jana Klein',      kuerzel: 'JK', color: '#5b4fcf', role: 'member' },
-        { id: 5,  name: 'Tim Wolf',        kuerzel: 'TW', color: '#b45309', role: 'member' },
-        { id: 6,  name: 'Sara Hoffmann',   kuerzel: 'SH', color: '#c2410c', role: 'member' },
-        { id: 7,  name: 'Finn Schreiber',  kuerzel: 'FS', color: '#0369a1', role: 'member' },
-        { id: 8,  name: 'Mia Krause',      kuerzel: 'MK', color: '#7c3aed', role: 'member' },
-    ];
+    const allMembers = INIT_DATA?.currentMembers;
 
-    const pool = [
-        { id: 9,  name: 'Leon Fischer',  kuerzel: 'LF', color: '#065f46' },
-        { id: 10, name: 'Anna Berger',   kuerzel: 'AB', color: '#9d174d' },
-        { id: 11, name: 'Noah Wagner',   kuerzel: 'NW', color: '#1e3a8a' },
-        { id: 12, name: 'Lena Schmidt',  kuerzel: 'LS', color: '#713f12' },
-        { id: 13, name: 'Paul Richter',  kuerzel: 'PR', color: '#064e3b' },
-        { id: 14, name: 'Klara Neumann', kuerzel: 'KN', color: '#4c1d95' },
-        { id: 15, name: 'Jonas Weber',   kuerzel: 'JW', color: '#155e75' },
-        { id: 16, name: 'Sophie Braun',  kuerzel: 'SB', color: '#7e22ce' },
-    ];
+    const pool = INIT_DATA?.userList;
+    const groupId = INIT_DATA?.groupId;
 
     let members = [...allMembers];
 
@@ -44,9 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             chip.innerHTML =
                 '<div class="gs-chip-avatar" style="background:' + m.color + '">' + m.kuerzel + '</div>' +
                 '<span class="gs-chip-name">' + m.name.split(' ')[0] + '</span>' +
-                (m.role !== 'admin'
-                    ? '<button class="gs-chip-remove" data-id="' + m.id + '" title="Entfernen">×</button>'
-                    : '<span class="gs-chip-star" title="Admin">★</span>');
+                (m.role !== 'admin' || m.role !== 'lehrer'
+                    ? '<button class="gs-chip-remove" data-id="' + m.id + '" title="Entfernen">×</button>': '');
             chipsWrap.appendChild(chip);
         });
         chipsWrap.querySelectorAll('.gs-chip-remove').forEach(btn => {
@@ -67,12 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<div class="gs-member-row-avatar" style="background:' + m.color + '">' + m.kuerzel + '</div>' +
                 '<div class="gs-member-row-info">' +
                     '<div class="gs-member-row-name">' + m.name + '</div>' +
-                    '<div class="gs-member-row-role">' + (m.role === 'admin' ? 'Administrator' : 'Mitglied') + '</div>' +
+                    '<div class="gs-member-row-role">' + (m.roleDisplayName) + '</div>' +
                 '</div>' +
                 '<div class="gs-member-row-actions">' +
-                    (m.role !== 'admin'
-                        ? '<button class="gs-role-btn" data-id="' + m.id + '" title="Zum Admin machen"><i class="material-icons">star_border</i></button>' +
-                          '<button class="gs-remove-btn" data-id="' + m.id + '" title="Entfernen"><i class="material-icons">person_remove</i></button>'
+                    (m.role !== 'admin' || m.role !== 'lehrer'
+                        ? '<button class="gs-remove-btn" data-id="' + m.id + '" title="Entfernen"><i class="material-icons">person_remove</i></button>'
                         : '<div class="gs-admin-badge" title="Admin"><i class="material-icons">star</i></div>'
                     ) +
                 '</div>';
@@ -143,10 +124,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderAddList(query) {
         const q = query.toLowerCase();
-        const candidates = [...pool, ...allMembers].filter(p =>
-            !members.find(m => m.id === p.id) &&
-            (!q || p.name.toLowerCase().includes(q))
+        
+        const rawCombined = [...pool, ...allMembers];
+        const combined = Array.from(
+            new Map(rawCombined.map(p => [Number(p.id), p])).values()
         );
+        
+        const candidates = combined.filter(p => {
+            // Prüfen, ob die Person bereits Mitglied in der Gruppe ist
+            const isAlreadyMember = members.some(m => Number(m.id) === Number(p.id));
+            
+            // Suchbegriff prüfen
+            const matchesQuery = !q || p.name.toLowerCase().includes(q);
+            return !isAlreadyMember && matchesQuery;
+        });
 
         addList.innerHTML = '';
 
@@ -162,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<div class="gs-member-row-avatar" style="background:' + p.color + ';width:40px;height:40px;font-size:.85rem;border-radius:50%">' + p.kuerzel + '</div>' +
                 '<div class="gs-add-member-info">' +
                     '<div class="gs-add-member-name">' + p.name + '</div>' +
-                    '<div class="gs-add-member-sub">Kann hinzugefügt werden</div>' +
+                    `<div class="gs-add-member-sub">${p?.roleDisplayName ?? p?.role}</div>` +
                 '</div>' +
                 '<button class="gs-add-member-confirm-btn" data-id="' + p.id + '">' +
                     '<i class="material-icons">add</i> Hinzufügen' +
@@ -172,22 +163,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         addList.querySelectorAll('.gs-add-member-confirm-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                const id = parseInt(this.dataset.id);
-                const all = [...pool, ...allMembers];
-                const p = all.find(x => x.id === id);
-                if (p && !members.find(x => x.id === id)) {
+                const id = Number(this.dataset.id);
+                const freshPool = INIT_DATA?.userList || [];
+                const rawAll = [...freshPool, ...allMembers];
+                
+                // Auch hier bei der Event-Suche die Duplikate entfernen
+                const all = Array.from(new Map(rawAll.map(x => [Number(x.id), x])).values());
+                
+                const p = all.find(x => Number(x.id) === id);
+                if (p && !members.some(x => Number(x.id) === id)) {
                     members.push({ ...p, role: 'member' });
                     renderAll();
                     markDirty();
                     showToast(p.name + ' hinzugefügt');
                     const row = this.closest('.gs-add-member-row');
                     row.classList.add('gs-add-member-row--added');
+                    
+                    // Aktualisiert das Modal sauber nach dem Hinzufügen
                     setTimeout(() => renderAddList(addSearch.value), 350);
                 }
             });
         });
     }
-
+    
     btnAddMember.addEventListener('click', openAddModal);
     btnAddClose.addEventListener('click', closeAddModal);
     addOverlay.addEventListener('click', e => { if (e.target === addOverlay) closeAddModal(); });

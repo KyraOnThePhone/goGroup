@@ -5,7 +5,11 @@ include 'actionScripts/sessioncheck.php';
 
 // Daten laden
 include 'actionScripts/groupDataLoader.php';
+
 $activeNav = "einstellungen";
+$allUsers = GetAllUsersFormatted();
+$currentMembers = GetGroupMembersFormatted($currentGroupId);
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -164,7 +168,7 @@ $activeNav = "einstellungen";
                         <div class="gs-overview-avatar" id="overviewAvatar"><? echo $gruppenAvatar ?></div>
                         <div class="gs-overview-info">
                             <div class="gs-overview-name" id="overviewName"><? echo $groupName ?></div>
-                            <div class="gs-overview-desc" id="overviewDesc">Leistungskurs Informatik, Jahrgang 12b.</div>
+                            <div class="gs-overview-desc" id="overviewDesc"><? echo $groupDescription ?></div>
                         </div>
                     </div>
                     <div class="gs-overview-stats">
@@ -262,6 +266,13 @@ $activeNav = "einstellungen";
 </div>
 
 <?php include 'components/footer.php'; ?>
+<script>
+    const INIT_DATA = {
+        userList: <? echo json_encode($allUsers); ?>,
+        groupId: <? echo $groupId?>,
+        currentMembers: <? echo json_encode($currentMembers) ?>
+    }
+</script>
 <script src="js/settings.js"></script>
 </body>
 </html>
