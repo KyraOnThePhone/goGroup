@@ -1,5 +1,6 @@
 <?php
 
+#region Helper für die DB
 function GetMultipleRecords($sql, $params = array()) {
     global $conn;
 
@@ -30,6 +31,20 @@ function GetSingleRecord($sql, $params = array()) {
     sqlsrv_free_stmt($stmt);
     return $row ? $row : null;
 }
+
+function ExecuteQuery($sql, $params = array()) {
+    global $conn;
+
+    $stmt = sqlsrv_query($conn, $sql, $params);
+    
+    if ($stmt === false) {
+        die(print_r(sqlsrv_errors(), true));
+    }
+
+    sqlsrv_free_stmt($stmt);
+    return true;
+}
+#endregion
 
 function GetUserGroups($userId) {
     $sql = "SELECT 

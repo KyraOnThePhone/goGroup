@@ -242,6 +242,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         this.disabled = true;
         this.innerHTML = '<i class="material-icons">hourglass_top</i> Wird gespeichert…';
+
+        // #region Save
+        const payload = {
+            groupId: Number(groupId),
+            groupName: val,
+            groupDescription: beschrArea?.value?.trim(),
+            memberIds: members.map(m => Number(m.id))
+        };
+
+        // Absenden
+        fetch('actionScripts/saveGroupSettings.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(
+            response => response.json()
+        )
+        .then(data => {
+            if (data.success) {
+                markClean();
+                this.innerHTML = '<i class="material-icons">check</i> Gespeichert!';
+                this.style.background = '#22c55e';
+                showToast('Einstellungen erfolgreich gespeichert');
+                
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.style.background = '';
+                    this.innerHTML = '<i class="material-icons">save</i> Änderungen speichern';
+                }, 2000);
+            } else {
+                throw new Error(data.message || 'Fehler beim Speichern');
+            }
+        })
+        .catch(error => {
+            console.error('Save Error:', error);
+            this.disabled = false;
+            this.style.background = '';
+            this.innerHTML = '<i class="material-icons">report_problem</i> Fehler!';
+            showToast('Fehler: ' + error.message);
+        });
+        // #endregion
+
+        /*
         setTimeout(() => {
             markClean();
             this.innerHTML = '<i class="material-icons">check</i> Gespeichert!';
@@ -253,6 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Einstellungen gespeichert');
             }, 2000);
         }, 700);
+        */
     });
 
     const unsavedOverlay = document.getElementById('gs_unsaved_overlay');

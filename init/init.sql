@@ -393,7 +393,8 @@ BEGIN
         ('Luca',  'Brüning',  1),
         ('Simon', 'Krainert', 1),
         ('Kyra',  'Mitwollen', 1),
-        ('Larissa', 'Windhorst', 1);
+        ('Larissa', 'Windhorst', 1),
+        ('Hans', 'Dieter', 2); -- Schüler
 END
 GO
 
@@ -404,7 +405,8 @@ BEGIN
         ('luca.bruening',  '$2y$12$p.JE.9o2a9Ea8HWQE7QUiOPDftMMEHo4eEVUvL5DlpUExtzCAOn/O', 1),
         ('simon.krainert', '$2y$12$gn6.Qu2VqsrNP5h.Nxe23OKWtP6zK4Z0C5cbSw3ft1TkmiremZ9LC', 2),
         ('kyra.mitwollen', '$2y$10$E3ms.OkOxXwukrItKcPafu9gREdwrZ.fryj2yVsk6T6a1HcQQii4a', 3),
-        ('larissa.windhorst', '$2y$10$3IqOfPVbV5CcIaskD2bLnuoF.9mhCYar4.yMNBoC81rvHUIMvK0Ni', 4);
+        ('larissa.windhorst', '$2y$10$3IqOfPVbV5CcIaskD2bLnuoF.9mhCYar4.yMNBoC81rvHUIMvK0Ni', 4),
+        ('hans.dieter','$2y$12$4EJF8qF7VRDoDS0Z1yR5DO8GA.TYHnG6.3JcixhTN4AzFOlDi5ay2',5) -- PW: 1234
 END
 GO
 
